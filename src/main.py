@@ -1,21 +1,56 @@
 import numpy as np
-from PyQt5 import Qt
+from PyQt5 import Qt, uic
 import pyqtgraph as pg
 
 
-class Window(Qt.QWidget):
-
+class Window:
     def __init__(self):
         super().__init__()
+        self.ui = Qt.QWidget()
 
-        layout = Qt.QVBoxLayout(self)
+        self.deg2rad = 0.01745329251
 
-        x = np.linspace(-10, 10, 1000)
-        y = x ** 3 - np.sin(x)
-        p = pg.PlotItem(x=x, y=y)
-        self.view = pg.PlotWidget(plotItem=p)
+        self.init_ui()
 
-        layout.addWidget(self.view)
+    def init_ui(self):
+        uic.loadUi("Ballistics.ui", self.ui)
+
+        self.ui.AngleInput.setText("30")
+        self.ui.VelocityInput.setText("10")
+        self.ui.GInput.setText("9.81")
+
+        self.ui.AngleInput.textChanged.connect(self.build_plot)
+        self.ui.VelocityInput.textChanged.connect(self.build_plot)
+        self.ui.GInput.textChanged.connect(self.build_plot)
+
+        self.ui.Plot.setAspectLocked()
+        self.ui.Plot.setLimits(xMin=0, yMin=0)
+
+        self.build_plot()
+
+    def build_plot(self):
+        angle = float(self.ui.AngleInput.text()) * self.deg2rad
+        velocity = float(self.ui.VelocityInput.text())
+        g = float(self.ui.GInput.text())
+
+        x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
+        y = self.f(x, angle, velocity, g)
+
+        self.ui.Plot.clear()
+        self.ui.Plot.plot(x=x, y=y)
+
+        try:
+            self.ui.Plot.setYRange(0, np.max(y) * 2, padding=0)
+            self.ui.Plot.setXRange(0, np.max(y) * 2, padding=0)
+        except:
+            pass
+
+    def f(self, x, angle, velocity, g):
+        t = x / (velocity * np.cos(angle))
+        return velocity * np.sin(angle) * t - g * (t ** 2) / 2
+
+    def show(self):
+        self.ui.show()
 
 
 if __name__ == "__main__":
