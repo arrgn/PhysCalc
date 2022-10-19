@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5 import Qt, uic
+from PyQt5 import Qt, uic, QtCore
 import pyqtgraph as pg
 
 
@@ -37,11 +37,11 @@ class Window:
         y = self.f(x, angle, velocity, g)
 
         self.ui.Plot.clear()
-        self.ui.Plot.plot(x=x, y=y)
+        self.ui.Plot.plot(x=x, y= y,pen=pg.mkPen('w', width=5, style=QtCore.Qt.DashLine))
 
         try:
-            self.ui.Plot.setYRange(0, np.max(y) * 2, padding=0)
-            self.ui.Plot.setXRange(0, np.max(y) * 2, padding=0)
+            self.ui.Plot.setYRange(0, np.max(y) * 1.5)
+            self.ui.Plot.setXRange(0, np.max(y) * 1.5)
         except:
             pass
 

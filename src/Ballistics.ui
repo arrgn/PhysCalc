@@ -90,30 +90,6 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="MassLayout">
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Масса</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="MassInput">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="GLayout">
          <item>
           <widget class="QLabel" name="label_4">
