@@ -30,9 +30,13 @@ class BallisticWindow:
         self.build_plot()
 
     def build_plot(self):
-        angle = float(self.ui.AngleInput.text()) * self.deg2rad
-        velocity = float(self.ui.VelocityInput.text())
-        g = float(self.ui.GInput.text())
+        try:
+            angle = float(self.ui.AngleInput.text()) * self.deg2rad
+            velocity = float(self.ui.VelocityInput.text())
+            g = float(self.ui.GInput.text())
+        except ValueError as e:
+            print(e)
+            return
 
         x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
         y = self.f(x, angle, velocity, g)
