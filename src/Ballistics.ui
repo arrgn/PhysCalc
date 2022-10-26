@@ -17,24 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="PlotWidget" name="Plot" native="true">
-       <widget class="QPushButton" name="menuButton">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>31</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </widget>
+      <widget class="PlotWidget" name="Plot" native="true"/>
      </item>
      <item>
       <layout class="QVBoxLayout" name="InputLayout">
