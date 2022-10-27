@@ -34,22 +34,22 @@ class BallisticWindow:
             angle = float(self.ui.AngleInput.text()) * self.deg2rad
             velocity = float(self.ui.VelocityInput.text())
             g = float(self.ui.GInput.text())
+
+
+            x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
+            y = self.f(x, angle, velocity, g)
+
+            self.ui.Plot.clear()
+            self.ui.Plot.plot(x=x, y=y, pen=pg.mkPen('w', width=5, style=QtCore.Qt.DashLine))
+
+            try:
+                self.ui.Plot.setYRange(0, np.max(y) * 1.5)
+                self.ui.Plot.setXRange(0, np.max(y) * 1.5)
+            except:
+                pass
         except ValueError as e:
             print(e)
             return
-
-        x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
-        y = self.f(x, angle, velocity, g)
-
-        self.ui.Plot.clear()
-        self.ui.Plot.plot(x=x, y=y, pen=pg.mkPen('w', width=5, style=QtCore.Qt.DashLine))
-
-        try:
-            self.ui.Plot.setYRange(0, np.max(y) * 1.5)
-            self.ui.Plot.setXRange(0, np.max(y) * 1.5)
-        except:
-            pass
-
     def f(self, x, angle, velocity, g):
         t = x / (velocity * np.cos(angle))
         return velocity * np.sin(angle) * t - g * (t ** 2) / 2
