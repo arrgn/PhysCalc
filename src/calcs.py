@@ -1,6 +1,6 @@
 import numpy as np
 from PyQt5 import Qt, uic, QtCore
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QLabel
 import pyqtgraph as pg
 
 
@@ -15,6 +15,9 @@ class CalcsWindow:
 
     def init_ui(self):
         uic.loadUi("Calcs.ui", self.ui)
+        label = QLabel(self.ui)
+        label.setGeometry(0, 0, 480, 480)
+        label.setText("WTF")
 
     def show(self):
         self.ui.show()
