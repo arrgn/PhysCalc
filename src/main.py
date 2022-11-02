@@ -3,6 +3,7 @@ from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
+from config import path_to_file
 
 
 class Window(QWidget):
@@ -27,7 +28,7 @@ class Window(QWidget):
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
 
-        uic.loadUi("Drop_menu.ui", self.drop_menu)
+        uic.loadUi(path_to_file("Drop_menu.ui"), self.drop_menu)
 
         # Here is example
         self.frame2 = QFrame(self)
