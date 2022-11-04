@@ -8,50 +8,23 @@ from calcs import CalcsWindow
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-
-        self.ui = QStackedWidget()
-        self.drop_menu = QWidget()
         self.menu_btn = QPushButton()
         self.animation = QPropertyAnimation()
-        self.frame2 = QFrame()
-        self.w1_btn = QPushButton()
-        self.w2_btn = QPushButton()
-
         self.init_ui()
 
     def init_ui(self):
         self.setGeometry(0, 0, 640, 640)
         self.ui = QStackedWidget(self)
         self.ui.setGeometry(0, 0, 640, 640)
-
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
-
+        self.drop_menu = QFrame(self)
         uic.loadUi("Drop_menu.ui", self.drop_menu)
 
-        # Here is example
-        self.frame2 = QFrame(self)
-        self.frame2.setGeometry(QtCore.QRect(0, 0, 0, 480))
-        self.frame2.setStyleSheet("background:red;")
-        self.frame2.setFrameShape(QFrame.StyledPanel)
-        self.frame2.setFrameShadow(QFrame.Raised)
-        self.frame2.setObjectName("frame2")
+        self.drop_menu.w1_btn.clicked.connect(self.switch_window)
+        self.drop_menu.w2_btn.clicked.connect(self.switch_window)
 
-        self.w1_btn = QPushButton(self.frame2)
-        self.w1_btn.setText("Ballistics window")
-        self.w1_btn.setGeometry(QtCore.QRect(0, 0, 121, 20))
-        self.w1_btn.setStyleSheet("background: green;")
-        self.w1_btn.setObjectName("w1_btn")
-        self.w1_btn.clicked.connect(self.switch_window)
-
-        self.w2_btn = QPushButton(self.frame2)
-        self.w2_btn.setText("Calcs window")
-        self.w2_btn.setGeometry(QtCore.QRect(0, 20, 121, 20))
-        self.w2_btn.setStyleSheet("background: cyan;")
-        self.w2_btn.setObjectName("w2_btn")
-        self.w2_btn.clicked.connect(self.switch_window)
-
-        self.animation = QPropertyAnimation(self.frame2, b"size", self.ui)
+        self.animation = QPropertyAnimation(self.drop_menu, b"size", self.ui)
         self.animation.setStartValue(QtCore.QSize(0, self.ui.height()))
         self.animation.setEndValue(QtCore.QSize(121, self.ui.height()))
         self.animation.setDuration(200)
