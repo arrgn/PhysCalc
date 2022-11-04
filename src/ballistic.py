@@ -21,9 +21,9 @@ class BallisticWindow:
         self.ui.VelocityInput.setText("10")
         self.ui.GInput.setText("9.81")
 
-        self.ui.AngleInput.textChanged.connect(self.build_plot)
-        self.ui.VelocityInput.textChanged.connect(self.build_plot)
-        self.ui.GInput.textChanged.connect(self.build_plot)
+        self.ui.AngleInput.textChanged.connect(lambda: self.build_plot())
+        self.ui.VelocityInput.textChanged.connect(lambda: self.build_plot())
+        self.ui.GInput.textChanged.connect(lambda: self.build_plot())
 
         self.ui.Plot.setAspectLocked()
         self.ui.Plot.setLimits(xMin=0, yMin=0)
