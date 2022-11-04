@@ -8,17 +8,17 @@ from calcs import CalcsWindow
 class Window(QWidget):
     def __init__(self):
         super().__init__()
+        self.ui = QStackedWidget(self)
+        self.drop_menu = QFrame(self)
         self.menu_btn = QPushButton()
         self.animation = QPropertyAnimation()
         self.init_ui()
 
     def init_ui(self):
         self.setGeometry(0, 0, 640, 640)
-        self.ui = QStackedWidget(self)
         self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
-        self.drop_menu = QFrame(self)
         uic.loadUi("Drop_menu.ui", self.drop_menu)
 
         self.drop_menu.w1_btn.clicked.connect(self.switch_window)
@@ -35,21 +35,25 @@ class Window(QWidget):
         self.menu_btn.setStyleSheet("background: blue")
         self.menu_btn.clicked.connect(self.show_hide_menu)
 
+        self.show_hide_menu()
+
     def switch_window(self):
-        if self.ui.sender().objectName() == self.w1_btn.objectName():
+        if self.ui.sender().objectName() == self.drop_menu.w1_btn.objectName():
             self.ui.setCurrentIndex(0)
-        elif self.ui.sender().objectName() == self.w2_btn.objectName():
+        elif self.ui.sender().objectName() == self.drop_menu.w2_btn.objectName():
             self.ui.setCurrentIndex(1)
         self.menu_btn.setChecked(False)
         self.show_hide_menu()
 
     def show_hide_menu(self):
         if self.menu_btn.isChecked():
+            self.menu_btn.hide()
             self.animation.setDirection(QtCore.QAbstractAnimation.Forward)
             self.animation.start()
         else:
             self.animation.setDirection(QtCore.QAbstractAnimation.Backward)
             self.animation.start()
+            self.menu_btn.show()
 
     def show(self):
         self.ui.show()
