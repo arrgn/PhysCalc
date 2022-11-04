@@ -18,7 +18,7 @@ class CalcsWindow:
     def init_ui(self):
         uic.loadUi(path_to_file("Calcs.ui"), self.ui)
 
-        self.ui.add_btn.clicked.connect(self.build_plot)
+        self.ui.add_btn.clicked.connect(lambda: self.build_plot())
 
     def build_plot(self):
         res = ChoosePlotWindow().get_result()

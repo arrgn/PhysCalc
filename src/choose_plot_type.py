@@ -11,17 +11,24 @@ class ChoosePlotWindow:
             self.vel = QRadioButton()
             self.space = QRadioButton()
 
+            self.inp_result = 0
+
             self.init_ui()
 
         def init_ui(self):
             uic.loadUi(path_to_file("Input_plot.ui"), self)
 
-            self.accel.click()
-            self.setResult(1)
+            self.buttonBox.accepted.connect(lambda: self.done(self.inp_result))
 
-            self.accel.clicked.connect(lambda: self.setResult(1))
-            self.vel.clicked.connect(lambda: self.setResult(2))
-            self.space.clicked.connect(lambda: self.setResult(3))
+            self.accel.clicked.connect(lambda: self.change_result(1))
+            self.vel.clicked.connect(lambda: self.change_result(2))
+            self.space.clicked.connect(lambda: self.change_result(3))
+
+            self.accel.click()
+
+        def change_result(self, new_result: int):
+            self.inp_result = new_result
+
 
     def __init__(self):
         super().__init__()
