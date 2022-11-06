@@ -16,10 +16,10 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>6</x>
-     <y>190</y>
+     <x>10</x>
+     <y>150</y>
      <width>91</width>
-     <height>220</height>
+     <height>371</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -71,6 +71,63 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="btn5">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>btn5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btn6">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>btn6</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btn7">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>btn7</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QPushButton" name="btn3">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -116,7 +173,7 @@
      <x>120</x>
      <y>20</y>
      <width>502</width>
-     <height>568</height>
+     <height>619</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="vl2">
@@ -158,7 +215,7 @@
        <enum>Qt::Vertical</enum>
       </property>
       <property name="sizeType">
-       <enum>QSizePolicy::MinimumExpanding</enum>
+       <enum>QSizePolicy::Minimum</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
@@ -174,7 +231,7 @@
        <bool>true</bool>
       </property>
       <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -182,11 +239,11 @@
       <property name="minimumSize">
        <size>
         <width>450</width>
-        <height>500</height>
+        <height>300</height>
        </size>
       </property>
       <property name="cursor">
-       <cursorShape>CrossCursor</cursorShape>
+       <cursorShape>PointingHandCursor</cursorShape>
       </property>
       <property name="mouseTracking">
        <bool>true</bool>
@@ -200,6 +257,26 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QDial" name="dial">
+   <property name="geometry">
+    <rect>
+     <x>19</x>
+     <y>40</y>
+     <width>71</width>
+     <height>81</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="spinBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>120</y>
+     <width>42</width>
+     <height>22</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <resources/>
