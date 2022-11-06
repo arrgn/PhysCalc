@@ -12,6 +12,7 @@ class CalcsWindow:
         self.ui = QWidget()
 
         self.deg2rad = 0.01745329251
+        self.functions = []
 
         self.init_ui()
 
@@ -21,7 +22,7 @@ class CalcsWindow:
         self.ui.add_btn.clicked.connect(lambda: self.build_plot())
 
     def build_plot(self):
-        res = ChoosePlotWindow().get_result()
+        res = ChoosePlotWindow(self.functions).get_result()
         if res == 0:
             return
 

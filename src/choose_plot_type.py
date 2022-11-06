@@ -5,14 +5,14 @@ from config import path_to_file
 
 class ChoosePlotWindow:
     class Dialog(QDialog):
-        def __init__(self):
+        def __init__(self, functions):
             super().__init__()
             self.accel = QRadioButton()
             self.vel = QRadioButton()
             self.space = QRadioButton()
             self.listWidget = QListWidget()
 
-            self.functions: [[str, str, str], ...] = []
+            self.functions: list[list[str, str, str]] = functions
 
             self.inp_result = 0
 
@@ -78,9 +78,9 @@ class ChoosePlotWindow:
             self.rightBorderInput.setText(self.functions[selected_row][1])
             self.functionInput.setText(self.functions[selected_row][2])
 
-    def __init__(self):
+    def __init__(self, functions):
         super().__init__()
-        self.result = self.Dialog().exec()
+        self.result = self.Dialog(functions).exec()
 
     def get_result(self):
         return self.result
