@@ -1,5 +1,5 @@
 from PyQt5 import Qt, uic
-from PyQt5.QtWidgets import QDialog, QRadioButton
+from PyQt5.QtWidgets import QDialog, QRadioButton, QListWidget
 from config import path_to_file
 
 
@@ -10,6 +10,7 @@ class ChoosePlotWindow:
             self.accel = QRadioButton()
             self.vel = QRadioButton()
             self.space = QRadioButton()
+            self.listWidget = QListWidget()
 
             self.functions: [[str, str, str], ...] = []
 
@@ -43,7 +44,7 @@ class ChoosePlotWindow:
                 change_index = 0
             elif self.sender().objectName() == "rightBorderInput":
                 change_index = 1
-            else:
+            elif self.sender().objectName() == "functionInput":
                 change_index = 2
 
             self.functions[self.listWidget.currentRow()][change_index] = self.sender().text()
@@ -52,8 +53,8 @@ class ChoosePlotWindow:
             self.inp_result = new_result
 
         def list_add_item(self):
-
             self.listWidget.addItem(f"el_{self.listWidget.count()}")
+            self.listWidget.setCurrentItem(self.listWidget.item(self.listWidget.count()))
             self.functions.append(["0", "0", ""])
 
             self.leftBorderInput.setText("0")
@@ -62,7 +63,6 @@ class ChoosePlotWindow:
             self.functionInput.setText("")
 
         def list_remove_item(self):
-
             if len(self.functions) <= 1:
                 return
 
