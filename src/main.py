@@ -26,7 +26,7 @@ class Window(QWidget):
         self.ui.addWidget(CalcsWindow().ui)
 
         self.drop_menu = QFrame(self)
-        uic.loadUi("drop_menu.ui", self.drop_menu)
+        uic.loadUi(path_to_file("drop_menu.ui"), self.drop_menu)
 
         self.drop_menu.w1_btn.clicked.connect(self.switch_window)
         self.drop_menu.w2_btn.clicked.connect(self.switch_window)
