@@ -11,8 +11,9 @@ class DAO:
 
     def __init__(self):
         self.con = connect(path_to_file("db.db"))
+        self.cur = self.con.cursor()
         build = """
-        CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS users (
     id       INTEGER           PRIMARY KEY
                            UNIQUE
                            NOT NULL,
@@ -20,9 +21,17 @@ class DAO:
                            NOT NULL,
     password VARCHAR (255) NOT NULL
 );
-
         """
-        self.cur = self.con.cursor()
+        self.cur.execute(build)
+        build = """
+CREATE TABLE IF NOT EXISTS workspaces (
+    user_id      REFERENCES users (id) ON DELETE CASCADE
+                 NOT NULL,
+    file    TEXT NOT NULL,
+    title    VARCHAR(255) NOT NULL,
+    description TEXT
+);
+        """
         self.cur.execute(build)
 
     def get_user_by_name(self, name):
@@ -45,11 +54,43 @@ class DAO:
         self.con.commit()
         return list(res)
 
+    def add_workspace_to_user(self, name, file, title, description):
+        user = self.get_user_by_name(name)
+        if not user:
+            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+        sql = """INSERT INTO workspaces VALUES(?, ?, ?, ?)"""
+        res = self.cur.execute(sql, [user[0][0], file, title, description])
+        self.con.commit()
+        return list(res)
+
+    def get_workspaces_by_user(self, name):
+        user = self.get_user_by_name(name)
+        if not user:
+            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+        sql = """SELECT * FROM workspaces JOIN users ON id=user_id WHERE id=?"""
+        res = self.cur.execute(sql, [user[0][0]])
+        self.con.commit()
+        return list(map(lambda x: x[:4], res))
+
+    def delete_workspace_from_user(self, name, file):
+        user = self.get_user_by_name(name)
+        if not user:
+            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+        sql = """DELETE FROM workspaces WHERE user_id=? AND file=?"""
+        res = self.cur.execute(sql, [user[0][0], file])
+        self.con.commit()
+        return list(res)
+
 
 if __name__ == "__main__":
     a = DAO()
     try:
         a.add_user("123", "qwerty")
     except DAO.UserExistsError as e:
-        a.delete_user_by_name("123")
+        print(e)
+    a.add_workspace_to_user("123", "a.txt", "MFW", "My First Workspace")
     print(a.get_user_by_name("123"))
+    workspaces = a.get_workspaces_by_user("123")
+    if len(workspaces) > 5:
+        a.delete_workspace_from_user("123", "a.txt")
+    print(a.get_workspaces_by_user("123"))
