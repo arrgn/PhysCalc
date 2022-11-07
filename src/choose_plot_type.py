@@ -1,5 +1,5 @@
 from PyQt5 import Qt, uic
-from PyQt5.QtWidgets import QDialog, QRadioButton, QListWidget
+from PyQt5.QtWidgets import QDialog, QRadioButton, QListWidget, QHBoxLayout
 from config import path_to_file
 
 
@@ -23,9 +23,9 @@ class ChoosePlotWindow:
 
             self.buttonBox.accepted.connect(lambda: self.done(self.inp_result))
 
-            self.accel.clicked.connect(lambda: self.change_result(1))
-            self.vel.clicked.connect(lambda: self.change_result(2))
-            self.space.clicked.connect(lambda: self.change_result(3))
+            self.accel.clicked.connect(lambda: self.change_plot_type())
+            self.vel.clicked.connect(lambda: self.change_plot_type())
+            self.space.clicked.connect(lambda: self.change_plot_type())
 
             self.addButton.clicked.connect(lambda: self.list_add_item())
             self.removeButton.clicked.connect(lambda: self.list_remove_item())
@@ -38,6 +38,18 @@ class ChoosePlotWindow:
 
             self.accel.click()
             self.list_add_item()
+
+        def change_plot_type(self):
+            if self.sender().objectName() == "accel":
+                self.change_result(1)
+                self.s0_widget.setHidden(False)
+                self.v0_widget.setHidden(False)
+            elif self.sender().objectName() == "vel":
+                self.s0_widget.setHidden(False)
+                self.v0_widget.setHidden(True)
+            elif self.sender().objectName() == "space":
+                self.s0_widget.setHidden(True)
+                self.v0_widget.setHidden(True)
 
         def autosave(self):
             if self.sender().objectName() == "leftBorderInput":
@@ -88,5 +100,5 @@ class ChoosePlotWindow:
 
 if __name__ == "__main__":
     app = Qt.QApplication([])
-    w = ChoosePlotWindow()
+    w = ChoosePlotWindow([])
     app.exec()
