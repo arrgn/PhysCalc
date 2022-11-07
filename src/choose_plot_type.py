@@ -1,5 +1,7 @@
 from PyQt5 import Qt, uic
 from PyQt5.QtWidgets import QDialog, QRadioButton, QListWidget, QHBoxLayout
+from typing import List
+
 from config import path_to_file
 
 
@@ -12,7 +14,7 @@ class ChoosePlotWindow:
             self.space = QRadioButton()
             self.listWidget = QListWidget()
 
-            self.functions: list[list[str, str, str]] = functions
+            self.functions: List[List[str, str, str]] = functions
 
             self.inp_result = 0
 
@@ -45,9 +47,11 @@ class ChoosePlotWindow:
                 self.s0_widget.setHidden(False)
                 self.v0_widget.setHidden(False)
             elif self.sender().objectName() == "vel":
+                self.change_result(2)
                 self.s0_widget.setHidden(False)
                 self.v0_widget.setHidden(True)
             elif self.sender().objectName() == "space":
+                self.change_result(3)
                 self.s0_widget.setHidden(True)
                 self.v0_widget.setHidden(True)
 
