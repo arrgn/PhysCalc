@@ -5,6 +5,15 @@ import pyqtgraph as pg
 from choose_plot_type import ChoosePlotWindow
 from config import path_to_file
 import sympy as sym
+from sympy import sin, cos, tan, cot, asin, acos, atan, acot, pi, log, sqrt
+
+
+def ctg(x):
+    return 1 / np.tan(x)
+
+
+def arcctg(x):
+    return -np.arctan(x) + pi / 2
 
 
 class CalcsWindow:
@@ -27,18 +36,36 @@ class CalcsWindow:
         self.ui.Plot_v.clear()
         self.ui.Plot_a.clear()
 
+        self.functions.clear()
+
         res = ChoosePlotWindow(self.functions).get_result()
         if res == 0:
             return
         elif res == 3:
             for segment in self.functions:
-                X = np.linspace(float(segment[0]), float(segment[1]))
+
+                X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))), 1000)
 
                 # Coordinate
 
-                y_s = eval(f"{segment[2]}".replace("x", "X"))
+                y_s = eval(f"{segment[2]}"
+                           .replace("asin", "np.ASIN")
+                           .replace("acos", "np.ACOS")
+                           .replace("atan", "np.ATAN")
+                           .replace("acos", "arcctg")
+                           .replace("sin", "np.sin")
+                           .replace("cos", "np.cos")
+                           .replace("tan", "np.tan")
+                           .replace("cot", "ctg")
+                           .replace("log", "np.log")
+                           .replace("ASIN", "arcsin")
+                           .replace("ACOT", "arccot")
+                           .replace("ATAN", "arctan")
+                           .replace("sqrt", "np.sqrt")
+                           .replace("x", "X"))
+
                 if type(y_s) == int or type(y_s) == float:
-                    y_s = np.linspace(y_s, y_s)
+                    y_s = np.linspace(y_s, y_s, 1000)
 
                 self.ui.Plot_s.plot(x=X, y=y_s)
 
@@ -46,19 +73,53 @@ class CalcsWindow:
 
                 # Velocity
 
-                y_v = eval(eval(f'str(sym.diff({segment[2]}))').replace("x", "X"))
+                expr = eval(segment[2])
+                velocity = str(sym.diff(expr)) \
+                    .replace("asin", "np.ASIN") \
+                    .replace("acos", "np.ACOS") \
+                    .replace("atan", "np.ATAN") \
+                    .replace("acos", "arcctg") \
+                    .replace("sin", "np.sin") \
+                    .replace("cos", "np.cos") \
+                    .replace("tan", "np.tan") \
+                    .replace("cot", "ctg") \
+                    .replace("log", "np.log") \
+                    .replace("ASIN", "arcsin") \
+                    .replace("ACOT", "arccot") \
+                    .replace("ATAN", "arctan") \
+                    .replace("sqrt", "np.sqrt") \
+                    .replace("x", "X")
+
+                y_v = eval(velocity)
 
                 if type(y_v) == int or type(y_v) == float:
-                    y_v = np.linspace(y_v, y_v)
+                    y_v = np.linspace(y_v, y_v, 1000)
 
                 self.ui.Plot_v.plot(x=X, y=y_v)
 
                 # Acceleration
 
-                y_a = eval(eval(f"str(sym.diff(eval(f'str(sym.diff({segment[2]}))')))").replace("x", "X"))
+                expr = eval(segment[2])
+                acceleration = str(sym.diff(expr, x, x)) \
+                    .replace("asin", "np.ASIN") \
+                    .replace("acos", "np.ACOS") \
+                    .replace("atan", "np.ATAN") \
+                    .replace("acos", "arcctg") \
+                    .replace("sin", "np.sin") \
+                    .replace("cos", "np.cos") \
+                    .replace("tan", "np.tan") \
+                    .replace("cot", "ctg") \
+                    .replace("log", "np.log") \
+                    .replace("ASIN", "arcsin") \
+                    .replace("ACOT", "arccot") \
+                    .replace("ATAN", "arctan") \
+                    .replace("sqrt", "np.sqrt") \
+                    .replace("x", "X")
+
+                y_a = eval(acceleration.replace("x", "X"))
 
                 if type(y_a) == int or type(y_a) == float:
-                    y_a = np.linspace(y_a, y_a)
+                    y_a = np.linspace(y_a, y_a, 1000)
 
                 self.ui.Plot_a.plot(x=X, y=y_a)
 
