@@ -120,7 +120,8 @@ class ThirdWindow:
             return ans
 
         def rotate_rect(self, rect, angle):
-            j = [[(rect[1][0] + rect[0][0]) / 2, (rect[1][1] + rect[2][1]) / 2], rect[1][0] - rect[0][0], rect[1][1] - rect[2][1], angle]
+            j = [[(rect[1][0] + rect[0][0]) / 2, (rect[1][1] + rect[2][1]) / 2], rect[1][0] - rect[0][0],
+                 rect[1][1] - rect[2][1], angle]
             j = self.rotate_rect_coards(*j)
             for h in range(len(j)):
                 j[h] = int(j[h][0]), int(j[h][1])
@@ -131,7 +132,6 @@ class ThirdWindow:
             for h in range(len(r)):
                 r[h] = QtCore.QPoint(*r[h])
             painter.drawConvexPolygon(*r)
-
 
         def paintEvent(self, event):
             qp = QPainter()
@@ -152,7 +152,6 @@ class ThirdWindow:
 
         def transform_coards_for_line(self, coards):
             return [coards[0][0], coards[0][1], coards[1][0], coards[1][1]]
-
 
         def flag_down(self):
             self.btn1_wait_to_click = -1
@@ -244,8 +243,6 @@ class ThirdWindow:
                 pass
             self.update()
 
-
-
         def inRange(self, mi, ma, coard):
             t = []
             for i in range(len(coard)):
@@ -336,7 +333,6 @@ class ThirdWindow:
                 a1[1] += rect[3]
             return [a1[0], a1[1], abs(rect[2]), abs(rect[3])]
 
-
         def mouseMoveEvent(self, event):
             mouse_coards = (event.x(), event.y())
             self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
@@ -414,7 +410,6 @@ class ThirdWindow:
                 self.object_history.append([2, [self.get_all_points(self.btn2_drawcoards), 0]])
                 self.btn2_drawcoards = []
                 self.btn2_wait_to_click = 0
-
 
             self.mousebtn.setText("Никакая")
             self.update()
