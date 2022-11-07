@@ -28,7 +28,7 @@ class Window(QWidget):
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
 
-        uic.loadUi(path_to_file("Drop_menu.ui"), self.drop_menu)
+        uic.loadUi(path_to_file("drop_menu.ui"), self.drop_menu)
 
         # Here is example
         self.frame2 = QFrame(self)

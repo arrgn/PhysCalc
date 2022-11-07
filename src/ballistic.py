@@ -15,7 +15,7 @@ class BallisticWindow:
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("Ballistics.ui"), self.ui)
+        uic.loadUi(path_to_file("ballistics.ui"), self.ui)
 
         self.ui.AngleInput.setText("30")
         self.ui.VelocityInput.setText("10")
