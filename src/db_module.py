@@ -9,8 +9,8 @@ class DAO:
     class UserDoesntExistError(Exception):
         pass
 
-    def __init__(self):
-        self.con = connect(path_to_file("db.db"))
+    def __init__(self, path_to_db="db.db"):
+        self.con = connect(path_to_file(path_to_db))
         self.cur = self.con.cursor()
         build = """
 CREATE TABLE IF NOT EXISTS users (
