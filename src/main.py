@@ -1,6 +1,6 @@
 from PyQt5 import Qt, QtCore, uic
 from PyQt5.QtCore import QPropertyAnimation
-from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame
+from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
 
@@ -8,17 +8,23 @@ from calcs import CalcsWindow
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-        self.ui = QStackedWidget(self)
-        self.drop_menu = QFrame(self)
+        self.ui = QStackedWidget()
+        self.layout_ = QGridLayout()
+        self.drop_menu = QFrame()
         self.menu_btn = QPushButton()
         self.animation = QPropertyAnimation()
         self.init_ui()
 
     def init_ui(self):
+        self.setLayout(self.layout_)
+        self.layout_.addWidget(self.ui)
+
         self.setGeometry(0, 0, 640, 640)
         self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
+
+        self.drop_menu = QFrame(self)
         uic.loadUi("Drop_menu.ui", self.drop_menu)
 
         self.drop_menu.w1_btn.clicked.connect(self.switch_window)
