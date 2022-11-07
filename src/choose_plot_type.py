@@ -19,7 +19,7 @@ class ChoosePlotWindow:
             self.init_ui()
 
         def init_ui(self):
-            uic.loadUi(path_to_file("Input_plot.ui"), self)
+            uic.loadUi(path_to_file("input_plot.ui"), self)
 
             self.buttonBox.accepted.connect(lambda: self.done(self.inp_result))
 
