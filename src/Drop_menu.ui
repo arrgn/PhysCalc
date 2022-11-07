@@ -13,9 +13,15 @@
   <property name="windowTitle">
    <string>Frame</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background: rgba(0,25,255,0.5);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QPushButton" name="w1_btn">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
      <property name="text">
       <string>Ballistics window</string>
      </property>
@@ -23,6 +29,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="w2_btn">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
      <property name="text">
       <string>Calcs window</string>
      </property>

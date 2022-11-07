@@ -55,6 +55,12 @@ class Window(QWidget):
             self.animation.start()
             self.menu_btn.show()
 
+    def resizeEvent(self, event):
+        if self.menu_btn.isChecked():
+            self.drop_menu.resize(QtCore.QSize(121, self.window().geometry().height()))
+        self.animation.setStartValue(QtCore.QSize(0, self.window().geometry().height()))
+        self.animation.setEndValue(QtCore.QSize(121, self.window().geometry().height()))
+
     def show(self):
         self.ui.show()
         super().show()
