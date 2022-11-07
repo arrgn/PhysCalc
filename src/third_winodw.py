@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QWidget
+from time import sleep
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -26,8 +27,6 @@ class ThirdWindow:
         def __init__(self):
             super().__init__()
 
-            # self.pixmap = QPixmap('i2.png')
-            # self.sandbox.setPixmap(self.pixmap)
             self.setMouseTracking(True)
 
             self.btn1_drawcoards = []
@@ -45,16 +44,20 @@ class ThirdWindow:
             self.ignore_rotate = False
 
             self.initUI()
+            self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
+                                      [220, 220, 220]]
+            self.repaint()
+
 
         def initUI(self):
-            uic.loadUi("Third_window.ui", self)
+            uic.loadUi("third_window.ui", self)
             self.mousepos.setText("Координаты: None, None")
             self.mousebtn.setText("Никакая")
             self.btn1.setText("Линия")
             self.btn2.setText("Прямоугольник")
             self.btn3.setText("Отмена")
             self.btn4.setText("Очистка")
-            self.btn5.setText("Поворот")
+            self.btn5.setText("Удалить")
             self.sandbox.setText("")
             self.btn1.clicked.connect(lambda: self.btn1_click())
             self.btn2.clicked.connect(lambda: self.btn2_click())
@@ -69,8 +72,8 @@ class ThirdWindow:
             self.spinBox.setValue(0)
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
-            self.dial.hide()
-            self.spinBox.hide()
+            # self.dial.hide()
+            # self.spinBox.hide()
 
         def renderf(self, qp):
 
@@ -172,6 +175,7 @@ class ThirdWindow:
             self.update()
 
         def btn3_click(self):
+            co = len(self.object_history)
             try:
                 if self.object_history:
                     while self.object_history[-1][0] == "rotated" and self.object_history[-1][1] == 0:
@@ -190,6 +194,9 @@ class ThirdWindow:
                         self.ignore_rotate = False
             except:
                 pass
+            finally:
+                if co == len(self.object_history) and co != 0:
+                    self.object_history.pop()
 
             self.update()
 
@@ -203,10 +210,13 @@ class ThirdWindow:
             print("cleaned")
 
         def btn5_click(self):
-            print("mode: ИЛЬЯ")
+            print("mode: DELETE")
+
+            if self.selected is not None:
+                del self.render_objects[2][self.render_objects[2].index(self.selected)]
+                self.selected = None
+
             self.flag_down()
-            if self.btn5_wait_to_click == -1:
-                self.btn5_wait_to_click = 0
             self.update()
 
         def rotate2_changed(self, value):
