@@ -1,7 +1,8 @@
 import numpy as np
-from PyQt5 import Qt, uic, QtCore
+from PyQt5 import Qt, uic, QtCore  # type: ignore
 from PyQt5.QtWidgets import QWidget
 import pyqtgraph as pg
+from config import path_to_file
 
 
 class BallisticWindow:
@@ -14,15 +15,15 @@ class BallisticWindow:
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi("Ballistics.ui", self.ui)
+        uic.loadUi(path_to_file("ballistics.ui"), self.ui)
 
         self.ui.AngleInput.setText("30")
         self.ui.VelocityInput.setText("10")
         self.ui.GInput.setText("9.81")
 
-        self.ui.AngleInput.textChanged.connect(self.build_plot)
-        self.ui.VelocityInput.textChanged.connect(self.build_plot)
-        self.ui.GInput.textChanged.connect(self.build_plot)
+        self.ui.AngleInput.textChanged.connect(lambda: self.build_plot())
+        self.ui.VelocityInput.textChanged.connect(lambda: self.build_plot())
+        self.ui.GInput.textChanged.connect(lambda: self.build_plot())
 
         self.ui.Plot.setAspectLocked()
         self.ui.Plot.setLimits(xMin=0, yMin=0)

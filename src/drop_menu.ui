@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
+
  <class>Frame</class>
  <widget class="QFrame" name="Frame">
   <property name="geometry">
