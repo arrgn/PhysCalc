@@ -48,7 +48,7 @@
        <item>
         <widget class="QRadioButton" name="space">
          <property name="text">
-          <string>Spacing</string>
+          <string>Coordinate</string>
          </property>
         </widget>
        </item>

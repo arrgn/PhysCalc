@@ -48,6 +48,9 @@ class CalcsWindow:
         self.s_o = eval(self.s_o.replace("pi", str(np.pi)))
         self.v_o = eval(self.v_o.replace("pi", str(np.pi)))
 
+        y_s = self.s_o
+        y_v = self.v_o
+
         if res == 0:
             return
         elif res == 3:
@@ -55,6 +58,8 @@ class CalcsWindow:
 
                 X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))),
                                 1000)
+
+                segment[2] = segment[2].replace("^", "**")
 
                 # Coordinate
 
@@ -72,7 +77,7 @@ class CalcsWindow:
                 expr = eval(segment[2])
                 velocity = self.sympy_to_numpy(str(sym.diff(expr)))
 
-                y_v = eval(velocity.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.v_o}")
+                y_v = eval(velocity)
 
                 if type(y_v) == int or type(y_v) == float:
                     y_v = np.linspace(y_v, y_v, 1000)
@@ -84,7 +89,7 @@ class CalcsWindow:
                 expr = eval(segment[2])
                 acceleration = self.sympy_to_numpy(str(sym.diff(expr, x, x)))
 
-                y_a = eval(acceleration.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})"))
+                y_a = eval(acceleration)
 
                 if type(y_a) == int or type(y_a) == float:
                     y_a = np.linspace(y_a, y_a, 1000)
@@ -100,6 +105,8 @@ class CalcsWindow:
                 X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))),
                                 1000)
 
+                segment[2] = segment[2].replace("^", "**")
+
                 # Velocity
 
                 y_v = eval(self.sympy_to_numpy(f"{segment[2]}"))
@@ -113,11 +120,11 @@ class CalcsWindow:
 
                 x = sym.Symbol('x')
 
-                expr = eval(segment[2] + f" + {self.v_o}")
+                expr = eval(segment[2])
 
-                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)))
+                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)) + f" + {self.v_o}")
 
-                y_s = eval(coordinate.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.s_o}")
+                y_s = eval(coordinate + " + " + str((self.s_o - eval(f"{coordinate}".replace("X", segment[0])))))
 
                 if type(y_s) == int or type(y_s) == float:
                     y_s = np.linspace(y_s, y_s, 1000)
@@ -145,6 +152,8 @@ class CalcsWindow:
                 X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))),
                                 1000)
 
+                segment[2] = segment[2].replace("^", "**")
+
                 # Acceleration
 
                 y_a = eval(self.sympy_to_numpy(f"{segment[2]}"))
@@ -159,9 +168,13 @@ class CalcsWindow:
                 x = sym.Symbol('x')
 
                 expr = eval(segment[2])
+
                 velocity = self.sympy_to_numpy(str(sym.integrate(expr, x)))
 
-                y_v = eval(velocity.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.v_o}")
+                func = velocity + " + " + str(
+                    (self.v_o - eval(f"{velocity}".replace("X", str(eval(segment[0].replace("pi", str(np.pi))))))))
+
+                y_v = eval(func)
 
                 if type(y_v) == int or type(y_v) == float:
                     y_v = np.linspace(y_v, y_v, 1000)
@@ -170,12 +183,12 @@ class CalcsWindow:
 
                 # Coordinate
 
-                expr = eval(str(sym.integrate(expr, x)) + f" + {self.v_o}")
+                expr = eval(func.replace("X", "x"))
 
-                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)))
+                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)) + f" + {self.v_o}")
 
-                y_s = eval(coordinate.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.s_o}")
-
+                y_s = eval(coordinate + " + " + str(
+                    (self.s_o - eval(f"{coordinate}".replace("X", str(eval(segment[0].replace("pi", str(np.pi)))))))))
                 if type(y_s) == int or type(y_s) == float:
                     y_s = np.linspace(y_s, y_s, 1000)
 
