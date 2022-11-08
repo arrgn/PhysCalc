@@ -2,7 +2,7 @@ import numpy as np
 from PyQt5 import Qt, uic, QtCore
 from PyQt5.QtWidgets import QWidget, QLabel
 import pyqtgraph as pg
-from config import path_to_file
+from path_module import path_to_file
 
 
 class CalcsWindow:

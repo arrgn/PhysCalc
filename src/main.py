@@ -3,7 +3,7 @@ from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from config import path_to_file
+from path_module import path_to_file
 
 
 class Window(QWidget):

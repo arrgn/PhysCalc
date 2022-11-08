@@ -1,12 +1,8 @@
-from pathlib import Path
-from os import path
-
-
-def path_to_file(filename: str) -> str:
-    return path.join(Path(__file__).parent.resolve(), filename)
-
+from db_module import DAO
 
 path_to_db = "db.db"
+# default_user: list[str(username), str(password)]
+default_user = ["default", ""]
 
 
 class User:
@@ -36,4 +32,5 @@ class User:
         return self._id, self.name
 
 
-user = User()
+dao = DAO(path_to_db, default_user)
+user = User(dao.get_user_by_name(default_user)[0], dao)

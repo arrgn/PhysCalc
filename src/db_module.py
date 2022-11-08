@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from config import path_to_file, path_to_db
+from path_module import path_to_file
 
 
 class DAO:
@@ -9,7 +9,7 @@ class DAO:
     class UserDoesntExistError(Exception):
         pass
 
-    def __init__(self, path_to_db="db.db"):
+    def __init__(self, path_to_db="db.db", default_user=["default", ""]):
         self.con = connect(path_to_file(path_to_db))
         self.cur = self.con.cursor()
         build = """
@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS workspaces (
 );
         """
         self.cur.execute(build)
+        if not self.get_user_by_name(default_user[0]):
+            self.add_user(default_user[0], default_user[1])
 
     def get_user_by_name(self, name):
         sql = """SELECT * FROM users WHERE username=?"""
@@ -87,9 +89,6 @@ CREATE TABLE IF NOT EXISTS workspaces (
         res = self.cur.execute(sql, [user[0][0], file])
         self.con.commit()
         return list(res)
-
-
-dao = DAO(path_to_db)
 
 
 if __name__ == "__main__":
