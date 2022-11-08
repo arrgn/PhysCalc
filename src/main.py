@@ -3,16 +3,63 @@ from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from config import path_to_file
+from path_module import path_to_file
 
 
 class Window(QWidget):
+    class SideMenu():
+        def __init__(self, widget: QWidget, btn: QPushButton, path: str, width: int, duration: int, left: bool) -> None:
+            self.menu = QFrame()
+            self.btn = btn
+            self.path = path
+            self.duration = duration
+            self.widget = widget
+            self.width = width
+            self.left = left
+            self.animation = QPropertyAnimation()
+
+            self.init_ui()
+
+        def init_ui(self):
+            self.menu = QFrame(self.widget)
+            uic.loadUi(path_to_file(self.path), self.menu)
+
+            self.animation = QPropertyAnimation(self.menu, b"size", self.widget.ui)
+            self.update_animation()
+            self.animation.setDuration(self.duration)
+
+        def show_hide_menu(self):
+            if self.btn.isChecked():
+                self.btn.hide()
+                self.animation.setDirection(QtCore.QAbstractAnimation.Forward)
+            else:
+
+                self.animation.setDirection(QtCore.QAbstractAnimation.Backward)
+                self.btn.show()
+            self.animation.start()
+
+        def resizeEvent(self):
+            self.update_animation()
+
+        def update_animation(self):
+            if self.left:
+                self.menu.setGeometry(QtCore.QRect(0, 0, self.width, self.widget.height()))
+            else:
+                self.menu.setGeometry(QtCore.QRect(self.widget.width() - self.width,
+                                                   0, self.width, self.widget.height()))
+            if not self.btn.isChecked():
+                self.menu.resize(QtCore.QSize(0, 0))
+            self.animation.setStartValue(QtCore.QSize(0, self.widget.height()))
+            self.animation.setEndValue(QtCore.QSize(self.width, self.widget.height()))
+
     def __init__(self):
         super().__init__()
         self.ui = QStackedWidget()
         self.layout_ = QGridLayout()
-        self.drop_menu = QFrame()
-        self.menu_btn = QPushButton()
+        self.drop_menu = None
+        self.auth_menu = None
+        self.drop_btn = QPushButton()
+        self.auth_btn = QPushButton()
         self.animation = QPropertyAnimation()
         self.init_ui()
 
@@ -25,48 +72,44 @@ class Window(QWidget):
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
 
-        self.drop_menu = QFrame(self)
-        uic.loadUi("drop_menu.ui", self.drop_menu)
+        self.drop_btn = QPushButton(self)
+        self.auth_btn = QPushButton(self)
 
-        self.drop_menu.w1_btn.clicked.connect(self.switch_window)
-        self.drop_menu.w2_btn.clicked.connect(self.switch_window)
+        self.drop_menu = self.SideMenu(self, self.drop_btn, "drop_menu.ui", 121, 200, True)
+        self.auth_menu = self.SideMenu(self, self.auth_btn, "auth_menu.ui", 121, 200, False)
 
-        self.animation = QPropertyAnimation(self.drop_menu, b"size", self.ui)
-        self.animation.setStartValue(QtCore.QSize(0, self.ui.height()))
-        self.animation.setEndValue(QtCore.QSize(121, self.ui.height()))
-        self.animation.setDuration(200)
+        self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
+        self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
+        self.auth_menu.menu.sign_in.clicked.connect(self.auth_btn.click)
+        self.auth_menu.menu.sign_up.clicked.connect(self.auth_btn.click)
 
-        self.menu_btn = QPushButton(self)
-        self.menu_btn.setCheckable(True)
-        self.menu_btn.setGeometry(Qt.QRect(5, 5, 25, 25))
-        self.menu_btn.setStyleSheet("background: blue")
-        self.menu_btn.clicked.connect(self.show_hide_menu)
+        self.drop_btn.setCheckable(True)
+        self.drop_btn.setGeometry(Qt.QRect(5, 5, 25, 25))
+        self.drop_btn.setStyleSheet("background: blue")
+        self.drop_btn.clicked.connect(self.drop_menu.show_hide_menu)
 
-        self.show_hide_menu()
+        self.auth_btn.setCheckable(True)
+        self.auth_btn.setGeometry(Qt.QRect(self.width() - 30, 5, 25, 25))
+        self.auth_btn.setStyleSheet("background: blue")
+        self.auth_btn.clicked.connect(self.auth_menu.show_hide_menu)
+
+        self.drop_menu.show_hide_menu()
+        self.auth_menu.show_hide_menu()
 
     def switch_window(self):
-        if self.ui.sender().objectName() == self.drop_menu.w1_btn.objectName():
+        if self.ui.sender().objectName() == self.drop_menu.menu.w1_btn.objectName():
             self.ui.setCurrentIndex(0)
-        elif self.ui.sender().objectName() == self.drop_menu.w2_btn.objectName():
+        elif self.ui.sender().objectName() == self.drop_menu.menu.w2_btn.objectName():
             self.ui.setCurrentIndex(1)
-        self.menu_btn.setChecked(False)
-        self.show_hide_menu()
-
-    def show_hide_menu(self):
-        if self.menu_btn.isChecked():
-            self.menu_btn.hide()
-            self.animation.setDirection(QtCore.QAbstractAnimation.Forward)
-            self.animation.start()
-        else:
-            self.animation.setDirection(QtCore.QAbstractAnimation.Backward)
-            self.animation.start()
-            self.menu_btn.show()
+        self.drop_btn.setChecked(False)
+        self.auth_btn.setChecked(False)
+        self.drop_menu.show_hide_menu()
+        self.auth_menu.show_hide_menu()
 
     def resizeEvent(self, event):
-        if self.menu_btn.isChecked():
-            self.drop_menu.resize(QtCore.QSize(121, self.window().geometry().height()))
-        self.animation.setStartValue(QtCore.QSize(0, self.window().geometry().height()))
-        self.animation.setEndValue(QtCore.QSize(121, self.window().geometry().height()))
+        self.drop_menu.resizeEvent()
+        self.auth_menu.resizeEvent()
+        self.auth_btn.move(self.width() - 30, 5)
 
     def show(self):
         self.ui.show()
