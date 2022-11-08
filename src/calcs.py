@@ -72,8 +72,6 @@ class CalcsWindow:
                 expr = eval(segment[2])
                 velocity = self.sympy_to_numpy(str(sym.diff(expr)))
 
-                print(velocity)
-
                 y_v = eval(velocity.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.v_o}")
 
                 if type(y_v) == int or type(y_v) == float:
@@ -116,10 +114,6 @@ class CalcsWindow:
                 x = sym.Symbol('x')
 
                 expr = eval(segment[2] + f" + {self.v_o}")
-
-                print(segment[2])
-                print(segment[2] + f" + {self.v_o}")
-                print()
 
                 coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)))
 
