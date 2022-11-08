@@ -117,12 +117,16 @@
               <item>
                <widget class="QLabel" name="s0_lab">
                 <property name="text">
-                 <string>S&lt;sub&gt;0&lt;/sub&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;S&lt;span style=&quot; vertical-align:sub;&quot;&gt;0&lt;/span&gt;= &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_3"/>
+               <widget class="QLineEdit" name="S_o">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -133,12 +137,16 @@
               <item>
                <widget class="QLabel" name="v0_lab">
                 <property name="text">
-                 <string>V&lt;sub&gt;0&lt;/sub&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;V&lt;span style=&quot; vertical-align:sub;&quot;&gt;0&lt;/span&gt;= &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_2"/>
+               <widget class="QLineEdit" name="V_o">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>

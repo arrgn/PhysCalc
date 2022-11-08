@@ -7,13 +7,14 @@ from config import path_to_file
 
 class ChoosePlotWindow:
     class Dialog(QDialog):
-        def __init__(self, functions):
+        def __init__(self, functions, start):
             super().__init__()
             self.accel = QRadioButton()
             self.vel = QRadioButton()
             self.space = QRadioButton()
             self.listWidget = QListWidget()
 
+            self.start = start
             self.functions: List[List[str, str, str]] = functions
 
             self.inp_result = 0
@@ -35,6 +36,9 @@ class ChoosePlotWindow:
             self.leftBorderInput.textChanged.connect(lambda: self.autosave())
             self.rightBorderInput.textChanged.connect(lambda: self.autosave())
             self.functionInput.textChanged.connect(lambda: self.autosave())
+
+            self.S_o.textChanged.connect(lambda: self.autosave())
+            self.V_o.textChanged.connect(lambda: self.autosave())
 
             self.listWidget.currentRowChanged.connect(lambda: self.list_on_row_changed())
 
@@ -62,6 +66,10 @@ class ChoosePlotWindow:
                 change_index = 1
             elif self.sender().objectName() == "functionInput":
                 change_index = 2
+            elif self.sender().objectName() in ["V_o",  "S_o"]:
+                self.start[0] = self.S_o.text()
+                self.start[1] = self.V_o.text()
+                return
 
             self.functions[self.listWidget.currentRow()][change_index] = self.sender().text()
 
@@ -94,9 +102,9 @@ class ChoosePlotWindow:
             self.rightBorderInput.setText(self.functions[selected_row][1])
             self.functionInput.setText(self.functions[selected_row][2])
 
-    def __init__(self, functions):
+    def __init__(self, functions, start):
         super().__init__()
-        self.result = self.Dialog(functions).exec()
+        self.result = self.Dialog(functions, start).exec()
 
     def get_result(self):
         return self.result

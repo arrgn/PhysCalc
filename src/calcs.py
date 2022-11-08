@@ -23,6 +23,9 @@ class CalcsWindow:
 
         self.deg2rad = 0.01745329251
         self.functions = []
+        self.s_o = 0
+        self.v_o = 0
+        self.start = ["0", "0"]
 
         self.init_ui()
 
@@ -38,31 +41,24 @@ class CalcsWindow:
 
         self.functions.clear()
 
-        res = ChoosePlotWindow(self.functions).get_result()
+        res = ChoosePlotWindow(self.functions, self.start).get_result()
+
+        self.s_o, self.v_o = self.start
+
+        self.s_o = eval(self.s_o.replace("pi", str(np.pi)))
+        self.v_o = eval(self.v_o.replace("pi", str(np.pi)))
+
         if res == 0:
             return
         elif res == 3:
             for segment in self.functions:
 
-                X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))), 1000)
+                X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))),
+                                1000)
 
                 # Coordinate
 
-                y_s = eval(f"{segment[2]}"
-                           .replace("asin", "np.ASIN")
-                           .replace("acos", "np.ACOS")
-                           .replace("atan", "np.ATAN")
-                           .replace("acos", "arcctg")
-                           .replace("sin", "np.sin")
-                           .replace("cos", "np.cos")
-                           .replace("tan", "np.tan")
-                           .replace("cot", "ctg")
-                           .replace("log", "np.log")
-                           .replace("ASIN", "arcsin")
-                           .replace("ACOT", "arccot")
-                           .replace("ATAN", "arctan")
-                           .replace("sqrt", "np.sqrt")
-                           .replace("x", "X"))
+                y_s = eval(self.sympy_to_numpy(f"{segment[2]}"))
 
                 if type(y_s) == int or type(y_s) == float:
                     y_s = np.linspace(y_s, y_s, 1000)
@@ -74,23 +70,11 @@ class CalcsWindow:
                 # Velocity
 
                 expr = eval(segment[2])
-                velocity = str(sym.diff(expr)) \
-                    .replace("asin", "np.ASIN") \
-                    .replace("acos", "np.ACOS") \
-                    .replace("atan", "np.ATAN") \
-                    .replace("acos", "arcctg") \
-                    .replace("sin", "np.sin") \
-                    .replace("cos", "np.cos") \
-                    .replace("tan", "np.tan") \
-                    .replace("cot", "ctg") \
-                    .replace("log", "np.log") \
-                    .replace("ASIN", "arcsin") \
-                    .replace("ACOT", "arccot") \
-                    .replace("ATAN", "arctan") \
-                    .replace("sqrt", "np.sqrt") \
-                    .replace("x", "X")
+                velocity = self.sympy_to_numpy(str(sym.diff(expr)))
 
-                y_v = eval(velocity)
+                print(velocity)
+
+                y_v = eval(velocity.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.v_o}")
 
                 if type(y_v) == int or type(y_v) == float:
                     y_v = np.linspace(y_v, y_v, 1000)
@@ -100,34 +84,116 @@ class CalcsWindow:
                 # Acceleration
 
                 expr = eval(segment[2])
-                acceleration = str(sym.diff(expr, x, x)) \
-                    .replace("asin", "np.ASIN") \
-                    .replace("acos", "np.ACOS") \
-                    .replace("atan", "np.ATAN") \
-                    .replace("acos", "arcctg") \
-                    .replace("sin", "np.sin") \
-                    .replace("cos", "np.cos") \
-                    .replace("tan", "np.tan") \
-                    .replace("cot", "ctg") \
-                    .replace("log", "np.log") \
-                    .replace("ASIN", "arcsin") \
-                    .replace("ACOT", "arccot") \
-                    .replace("ATAN", "arctan") \
-                    .replace("sqrt", "np.sqrt") \
-                    .replace("x", "X")
+                acceleration = self.sympy_to_numpy(str(sym.diff(expr, x, x)))
 
-                y_a = eval(acceleration.replace("x", "X"))
+                y_a = eval(acceleration.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})"))
 
                 if type(y_a) == int or type(y_a) == float:
                     y_a = np.linspace(y_a, y_a, 1000)
 
                 self.ui.Plot_a.plot(x=X, y=y_a)
 
-                """ 
-                TEST INPUT DATA:
-                0-1: (x ** 2) + 2 * (x ** 3)
-                1-5: -4 * (x ** 2) + 16 * x - 9
-                """
+        elif res == 2:
+            for segment in self.functions:
+
+                X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))),
+                                1000)
+
+                # Velocity
+
+                y_v = eval(self.sympy_to_numpy(f"{segment[2]}"))
+
+                if type(y_v) == int or type(y_v) == float:
+                    y_v = np.linspace(y_v, y_v, 1000)
+
+                self.ui.Plot_v.plot(x=X, y=y_v)
+
+                # Coordinate
+
+                x = sym.Symbol('x')
+
+                expr = eval(segment[2])
+                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)) + f" + {self.s_o}")
+
+                y_s = eval(coordinate.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.s_o}")
+
+                if type(y_s) == int or type(y_s) == float:
+                    y_s = np.linspace(y_s, y_s, 1000)
+
+                self.ui.Plot_s.plot(x=X, y=y_s)
+
+                # Acceleration
+
+                expr = eval(segment[2])
+                acceleration = self.sympy_to_numpy(str(sym.diff(expr)))
+
+                y_a = eval(acceleration.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})"))
+
+                if type(y_a) == int or type(y_a) == float:
+                    y_a = np.linspace(y_a, y_a, 1000)
+
+                self.ui.Plot_a.plot(x=X, y=y_a)
+
+        elif res == 1:
+            for segment in self.functions:
+
+                X = np.linspace(eval(segment[0].replace("pi", str(np.pi))), eval(segment[1].replace("pi", str(np.pi))),
+                                1000)
+
+                # Acceleration
+
+                y_a = eval(self.sympy_to_numpy(f"{segment[2]}"))
+
+                if type(y_a) == int or type(y_a) == float:
+                    y_a = np.linspace(y_a, y_a, 1000)
+
+                self.ui.Plot_a.plot(x=X, y=y_a)
+
+                # Velocity
+
+                x = sym.Symbol('x')
+
+                expr = eval(segment[2])
+                velocity = self.sympy_to_numpy(str(sym.integrate(expr, x)))
+
+                y_v = eval(velocity.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.v_o}")
+
+                if type(y_v) == int or type(y_v) == float:
+                    y_v = np.linspace(y_v, y_v, 1000)
+
+                self.ui.Plot_v.plot(x=X, y=y_v)
+
+                # Coordinate
+
+                expr = eval(str(sym.integrate(expr, x)) + f" + {self.v_o}")
+
+                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)))
+
+                y_s = eval(coordinate.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.s_o}")
+
+                if type(y_s) == int or type(y_s) == float:
+                    y_s = np.linspace(y_s, y_s, 1000)
+
+                self.ui.Plot_s.plot(x=X, y=y_s)
+
+                self.v_o = y_v[-1]
+                self.s_o = y_s[-1]
+
+    def sympy_to_numpy(self, expr: str):
+        return expr.replace("asin", "np.ASIN") \
+            .replace("acos", "np.ACOS") \
+            .replace("atan", "np.ATAN") \
+            .replace("acos", "arcctg") \
+            .replace("sin", "np.sin") \
+            .replace("cos", "np.cos") \
+            .replace("tan", "np.tan") \
+            .replace("cot", "ctg") \
+            .replace("log", "np.log") \
+            .replace("ASIN", "arcsin") \
+            .replace("ACOT", "arccot") \
+            .replace("ATAN", "arctan") \
+            .replace("sqrt", "np.sqrt") \
+            .replace("x", "X")
 
     def show(self):
         self.ui.show()
