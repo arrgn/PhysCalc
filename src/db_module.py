@@ -38,6 +38,13 @@ CREATE TABLE IF NOT EXISTS workspaces (
         sql = """SELECT * FROM users WHERE username=?"""
         return list(self.cur.execute(sql, [name]))
 
+    def get_checked_user(self, name, password):
+        if not self.get_user_by_name(name):
+            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+        sql = """SELECT * FROM users WHERE username=? AND password=?"""
+        res = self.cur.execute(sql, [name, password])
+        return list(res)
+
     def add_user(self, name, passwd):
         if self.get_user_by_name(name):
             raise self.UserExistsError(f"user with name {name} already exists")
