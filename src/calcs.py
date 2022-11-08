@@ -93,6 +93,9 @@ class CalcsWindow:
 
                 self.ui.Plot_a.plot(x=X, y=y_a)
 
+                self.v_o = y_v[-1]
+                self.s_o = y_s[-1]
+
         elif res == 2:
             for segment in self.functions:
 
@@ -112,8 +115,13 @@ class CalcsWindow:
 
                 x = sym.Symbol('x')
 
-                expr = eval(segment[2])
-                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)) + f" + {self.s_o}")
+                expr = eval(segment[2] + f" + {self.v_o}")
+
+                print(segment[2])
+                print(segment[2] + f" + {self.v_o}")
+                print()
+
+                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)))
 
                 y_s = eval(coordinate.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})") + f" + {self.s_o}")
 
@@ -133,6 +141,9 @@ class CalcsWindow:
                     y_a = np.linspace(y_a, y_a, 1000)
 
                 self.ui.Plot_a.plot(x=X, y=y_a)
+
+                self.v_o = y_v[-1]
+                self.s_o = y_s[-1]
 
         elif res == 1:
             for segment in self.functions:
