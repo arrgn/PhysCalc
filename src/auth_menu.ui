@@ -6,16 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>158</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Frame</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background: rgba(0,25,255,0.5);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QPushButton" name="sign_in">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
      <property name="text">
       <string>Sign in</string>
      </property>
@@ -23,6 +29,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="sign_up">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
      <property name="text">
       <string>Sign up</string>
      </property>
