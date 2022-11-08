@@ -5,7 +5,7 @@ import pyqtgraph as pg
 from choose_plot_type import ChoosePlotWindow
 from config import path_to_file
 import sympy as sym
-from sympy import sin, cos, tan, cot, asin, acos, atan, acot, pi, log, sqrt
+from sympy import *
 
 
 def ctg(x):
