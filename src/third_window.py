@@ -1,3 +1,4 @@
+import json
 import random
 import sys
 from math import radians, cos, sin
@@ -6,9 +7,9 @@ from PyQt5 import QtCore
 from PyQt5 import uic
 from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel
 from PyQt5.QtWidgets import QWidget
-from time import sleep
+from copy import deepcopy
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -24,9 +25,33 @@ class ExceptionHandler(QtCore.QObject):
 
 class ThirdWindow:
     class DrawWindow(QWidget):
+        class Dialog(QDialog):
+            def __init__(self, text, title, show_button_ok=False):
+                super().__init__()
+                self.text = text
+                self.show_button_ok = show_button_ok
+                self.title = title
+                self.initUI()
+
+            def initUI(self):
+                if self.show_button_ok:
+                    QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+                else:
+                    QBtn = QDialogButtonBox.Cancel
+
+                self.buttonBox = QDialogButtonBox(QBtn)
+                self.buttonBox.accepted.connect(self.accept)
+                self.buttonBox.rejected.connect(self.reject)
+
+                self.layout = QVBoxLayout()
+                message = QLabel(self.text)
+                self.layout.addWidget(message)
+                self.layout.addWidget(self.buttonBox)
+                self.setLayout(self.layout)
+                self.setWindowTitle(self.title)
+
         def __init__(self):
             super().__init__()
-
             self.setMouseTracking(True)
 
             self.btn1_drawcoards = []
@@ -42,12 +67,15 @@ class ThirdWindow:
             self.current_patt = random.choice(self.patterns)
             self.angle = 1
             self.ignore_rotate = False
+            self.mouse_btn = 0
+            self.keys = []
+            self.mouse_tracking = False
+            self.moving = None
 
             self.initUI()
             self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
                                       [220, 220, 220]]
             self.repaint()
-
 
         def initUI(self):
             uic.loadUi("third_window.ui", self)
@@ -57,13 +85,15 @@ class ThirdWindow:
             self.btn2.setText("Прямоугольник")
             self.btn3.setText("Отмена")
             self.btn4.setText("Очистка")
-            self.btn5.setText("Удалить")
+            self.btn5.setText("Сохранить")
+            self.btn6.setText("Загрузить")
             self.sandbox.setText("")
             self.btn1.clicked.connect(lambda: self.btn1_click())
             self.btn2.clicked.connect(lambda: self.btn2_click())
             self.btn3.clicked.connect(lambda: self.btn3_click())
             self.btn4.clicked.connect(lambda: self.btn4_click())
             self.btn5.clicked.connect(lambda: self.btn5_click())
+            self.btn6.clicked.connect(lambda: self.btn6_click())
             self.dial.setMinimum(0)
             self.dial.setMaximum(359)
             self.dial.setValue(0)
@@ -72,8 +102,6 @@ class ThirdWindow:
             self.spinBox.setValue(0)
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
-            # self.dial.hide()
-            # self.spinBox.hide()
 
         def renderf(self, qp):
 
@@ -109,6 +137,11 @@ class ThirdWindow:
 
             if len(self.btn2_drawcoards) == 2:
                 qp.drawRect(*self.transform_coards_for_rect(self.btn2_drawcoards))
+
+            qp.setBrush(QBrush())
+            qp.setPen(QPen(Qt2.black, 3, Qt2.DashDotLine))
+            if self.moving is not None:
+                self.drawRect(self.moving[0], self.moving[1], qp)
 
         def rotate_rect_coards(self, center, w, h, angle):
             ans = [[], [], [], []]
@@ -209,6 +242,31 @@ class ThirdWindow:
             print("cleaned")
 
         def btn5_click(self):
+            rs = self.Dialog("Вы уверены, что хотите заменить сохранение?", "Сохранение", True).exec()
+            if rs:
+                data = {
+                    "render_objects": self.render_objects,
+                    "object_history": self.object_history
+                }
+                with open("data.json", "w") as file:
+                    json.dump(data, file)
+
+                print("SAVED")
+
+        def btn6_click(self):
+            rs = self.Dialog("Вы уверены, что хотите загрузить сохранение?", "Сохранение", True).exec()
+            if rs:
+                try:
+                    self.flag_down()
+                    with open("data.json", "r") as file:
+                        data = json.load(file)
+                        self.render_objects = data["render_objects"]
+                        self.object_history = data["object_history"]
+                except:
+                    self.Dialog("Не найдено сохранение или оно некоректно", "Сохранение").exec()
+
+
+        def delete_selected(self):
             print("mode: DELETE")
 
             if self.selected is not None:
@@ -333,8 +391,20 @@ class ThirdWindow:
                 a1[1] += rect[3]
             return [a1[0], a1[1], abs(rect[2]), abs(rect[3])]
 
+        def keyPressEvent(self, event):
+            if event.key() in [Qt2.Key_Delete, 16777219]:
+                self.delete_selected()
+            if event.key() == Qt2.Key_Z and Qt2.Key_Control in self.keys:
+                self.btn3_click()
+
+            self.keys.append(event.key())
+
+        def keyReleaseEvent(self, event):
+            del self.keys[self.keys.index(event.key())]
+
         def mouseMoveEvent(self, event):
             mouse_coards = (event.x(), event.y())
+            mouse_btn = event.button()
             self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
                                       [220, 220, 220]]
             if len(self.btn1_drawcoards) == 2:
@@ -343,23 +413,32 @@ class ThirdWindow:
             if len(self.btn2_drawcoards) == 2:
                 self.btn2_drawcoards[1] = self.moose_set_in_widget(mouse_coards, self.sandbox)
 
+            if self.selected is not None and self.mouse_btn == 2 and self.mouse_tracking:
+                buf = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
+                dx, dy = mouse_coards[0] - self.start_coards[0], mouse_coards[1] - self.start_coards[1]
+                buf[0] = [[buf[0][0][0] + dx, buf[0][0][1] + dy], [buf[0][1][0] + dx, buf[0][1][1] + dy], [buf[0][2][0] + dx, buf[0][2][1] + dy],[buf[0][3][0] + dx, buf[0][3][1] + dy]]
+                if not self.RectAndWidgetCollision(buf[0], self.sandbox):
+                    self.moving = buf
+
+
+
             self.mousepos.setText(f"Координаты: {event.x()}, {event.y()}")
             self.update()
 
         def mousePressEvent(self, event):
             mouse_coards = (event.x(), event.y())
-            mouse_btn = event.button()
+            self.mouse_btn = event.button()
             mouse_in_sandbox = self.mouse_in_widget(mouse_coards, self.sandbox)[-1]
             self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
                                       [220, 220, 220]]
-            if self.btn1_wait_to_click in [0] and mouse_in_sandbox and mouse_btn == 1:
+            if self.btn1_wait_to_click in [0] and mouse_in_sandbox and self.mouse_btn == 1:
                 self.selected = None
                 if self.btn1_wait_to_click == 0:
                     self.btn1_drawcoards = [mouse_coards, mouse_coards]
                     self.btn1_wait_to_click = 1
                     print(f"starting drawing LINE from ({mouse_coards[0]}, {mouse_coards[1]})")
 
-            if self.btn2_wait_to_click in [0] and mouse_in_sandbox and mouse_btn == 1:
+            if self.btn2_wait_to_click in [0] and mouse_in_sandbox and self.mouse_btn == 1:
                 if self.btn2_wait_to_click == 0:
                     self.selected = None
                     self.current_patt = random.choice(self.patterns)
@@ -367,7 +446,13 @@ class ThirdWindow:
                     self.btn2_wait_to_click = 1
                     print(f"starting drawing RECT from ({mouse_coards[0]}, {mouse_coards[1]})")
 
-            if mouse_btn == 2 and mouse_in_sandbox:
+            if self.mouse_btn == 2 and mouse_in_sandbox:
+                buf = self.select_rect(self.render_objects[2], mouse_coards)
+                if buf == self.selected:
+                    self.mouse_tracking = True
+                    self.start_coards = mouse_coards
+                else:
+                    self.mouse_tracking = False
                 self.selected = self.select_rect(self.render_objects[2], mouse_coards)
                 if self.selected is not None:
                     print(f"selected RECT {self.selected} with number {self.render_objects[2].index(self.selected)}")
@@ -392,6 +477,7 @@ class ThirdWindow:
         def mouseReleaseEvent(self, event):
             mouse_coards = (event.x(), event.y())
             mouse_btn = event.button()
+            self.mouse_btn = 0
             self.ignore_rotate = True
             self.dial.setValue(0)
             self.ignore_rotate = False
@@ -410,6 +496,9 @@ class ThirdWindow:
                 self.object_history.append([2, [self.get_all_points(self.btn2_drawcoards), 0]])
                 self.btn2_drawcoards = []
                 self.btn2_wait_to_click = 0
+
+            if self.moving and self.mouse_tracking:
+                pass
 
             self.mousebtn.setText("Никакая")
             self.update()
