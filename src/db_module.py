@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from config import path_to_file
+from config import path_to_file, path_to_db
 
 
 class DAO:
@@ -87,6 +87,9 @@ CREATE TABLE IF NOT EXISTS workspaces (
         res = self.cur.execute(sql, [user[0][0], file])
         self.con.commit()
         return list(res)
+
+
+dao = DAO(path_to_db)
 
 
 if __name__ == "__main__":
