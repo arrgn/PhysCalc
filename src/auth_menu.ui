@@ -18,6 +18,16 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QPushButton" name="closer">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="sign_in">
      <property name="styleSheet">
       <string notr="true">background: red;</string>
