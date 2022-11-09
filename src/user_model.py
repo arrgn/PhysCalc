@@ -39,6 +39,9 @@ class User:
         except DAO.UserDoesntExistError as e:
             print(e)
             return False
+        except DAO.UserExistsError as e:
+            print(e)
+            return False
 
     def delete_user(self):
         try:
