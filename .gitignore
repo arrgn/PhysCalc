@@ -134,3 +134,6 @@ dmypy.json
 .fleet/
 .vs/
 .idea/
+
+# Ignore local database
+src/db.db
