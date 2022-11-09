@@ -48,7 +48,7 @@ class SideMenu:
                                                0, self.width, self.widget.height()))
         if not self.btn.isChecked():
             self.menu.resize(QtCore.QSize(0, 0))
-        self.animation.setStartValue(QtCore.QSize(0, self.widget.height()))
+        self.animation.setStartValue(QtCore.QSize(self.width, 0))
         self.animation.setEndValue(QtCore.QSize(self.width, self.widget.height()))
 
     def close(self):
