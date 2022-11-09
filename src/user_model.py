@@ -1,15 +1,12 @@
-import shutil
-
 from db_module import DAO
 from path_module import path_to_userdata, copy_file, create_dir
 
 
 class User:
-    def __init__(self, name=None, database=None):
-        self.name = None
+    def __init__(self, database=None):
+        self.name = "guest"
+        self.id = 0
         self.dao = None
-        if name is not None:
-            self.name = name
         if database is not None:
             self.dao = database
 
@@ -17,8 +14,9 @@ class User:
         try:
             self.dao.add_user(name, password)
             self.name = name
-            create_dir(self.name)
-            copy_file(path_to_userdata("default.png", "default"), self.name)
+            self.id = str(self.dao.get_user_by_name(self.name)[0][0])
+            create_dir(self.id)
+            copy_file(path_to_userdata("default.png", "default"), self.id)
             return True
         except DAO.UserExistsError as e:
             print(e)
@@ -28,6 +26,7 @@ class User:
         try:
             res = self.dao.get_checked_user(name, password)
             self.name = name
+            self.id = str(self.dao.get_user_by_name(self.name)[0][0])
             return res
         except DAO.UserDoesntExistError as e:
             print(e)
@@ -35,6 +34,9 @@ class User:
 
     def get_user(self):
         return self.name
+
+    def get_user_id(self):
+        return self.id
 
     def get_avatar(self):
         try:

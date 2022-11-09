@@ -12,9 +12,7 @@ class DAO:
     class WorkspaceNotFoundError(Exception):
         pass
 
-    def __init__(self, path_to_db="db.db", default_user=None):
-        if default_user is None:
-            default_user = ["default", ""]
+    def __init__(self, path_to_db="db.db"):
         self.con = connect(path_to_file(path_to_db))
         self.cur = self.con.cursor()
         build = """
@@ -23,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users
     id       INTEGER PRIMARY KEY UNIQUE NOT NULL,
     username VARCHAR(255) UNIQUE        NOT NULL,
     password VARCHAR(255)               NOT NULL,
-    avatar   TEXT                       NOT NULL
+    avatar   TEXT
 );
         """
         self.cur.execute(build)
@@ -37,8 +35,6 @@ CREATE TABLE IF NOT EXISTS workspaces
 );
         """
         self.cur.execute(build)
-        if not self.get_user_by_name(default_user[0]):
-            self.add_user(default_user[0], default_user[1])
 
     def get_user_by_name(self, name):
         sql = """SELECT id, username, avatar FROM users WHERE username=?"""
@@ -52,11 +48,13 @@ CREATE TABLE IF NOT EXISTS workspaces
         res = self.cur.execute(sql, [name, password])
         return list(res)
 
-    def add_user(self, name, passwd, avatar="default.png"):
-        if self.get_user_by_name(name):
+    def add_user(self, name, passwd):
+        user = self.get_user_by_name(name)
+        if user:
             raise self.UserExistsError(f"user with name {name} already exists")
-        sql = """INSERT INTO users(username, password, avatar) VALUES(?, ?, ?)"""
-        res = self.cur.execute(sql, [name, passwd, path_to_userdata(avatar, name)])
+        sql = """INSERT INTO users(username, password) VALUES(?, ?)"""
+        res = self.cur.execute(sql, [name, passwd])
+        self.change_avatar(name)
         self.con.commit()
         return list(res)
 
@@ -77,7 +75,7 @@ CREATE TABLE IF NOT EXISTS workspaces
         if not user:
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
         sql = """UPDATE users SET avatar=? WHERE id=?"""
-        res = self.cur.execute(sql, [path_to_userdata(avatar, name), user[0][0]])
+        res = self.cur.execute(sql, [path_to_userdata(avatar, str(user[0][0])), user[0][0]])
         self.con.commit()
         return res
 
@@ -89,12 +87,12 @@ CREATE TABLE IF NOT EXISTS workspaces
         self.con.commit()
         return list(res)
 
-    def add_workspace_to_user(self, username, file, title, description):
+    def add_workspace_to_user(self, username, filename, title, description):
         user = self.get_user_by_name(username)
         if not user:
             raise self.UserDoesntExistError(f"user with name {username} doesnt exist")
         sql = """INSERT INTO workspaces VALUES(?, ?, ?, ?)"""
-        res = self.cur.execute(sql, [user[0][0], file, title, description])
+        res = self.cur.execute(sql, [user[0][0], path_to_userdata(filename, str(user[0][0])), title, description])
         self.con.commit()
         return list(res)
 

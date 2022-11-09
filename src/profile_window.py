@@ -1,4 +1,3 @@
-import shutil
 from os.path import basename
 from PyQt5 import Qt, uic
 from PyQt5.QtCore import Qt as Qt2
@@ -46,7 +45,9 @@ class ProfileWindow(QDialog):
     def browse_files(self):
         file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", user.get_user()),
                                                 "Image (*.png *.jpg)")[0]
-        copy_file(file_name, user.get_user())
+        if file_name == "":
+            return
+        copy_file(file_name, str(user.get_user_id()))
         user.change_avatar(basename(file_name))
         self.load_avatar()
 
