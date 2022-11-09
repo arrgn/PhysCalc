@@ -1,4 +1,8 @@
+import shutil
+
 from db_module import DAO
+from os import makedirs
+from path_module import path_to_userdata
 
 
 class User:
@@ -14,6 +18,8 @@ class User:
         try:
             self.dao.add_user(name, password)
             self.name = name
+            makedirs(path_to_userdata("", self.name))
+            shutil.copy(path_to_userdata("default.png", "default"), path_to_userdata("default.png", self.name))
             return True
         except DAO.UserExistsError as e:
             print(e)

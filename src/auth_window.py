@@ -39,7 +39,7 @@ class AuthWindow(QDialog):
         password = self.password.text()
         res = user.set_user(name, password)
         if not res:
-            self.error.setText(f"Can't sig in vai {name}!")
+            self.error.setText(f"Can't sig in via {name}!")
             return
         self.error.setText(f"Successfully sign in via user {name}.")
 
