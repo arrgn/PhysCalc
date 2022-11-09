@@ -28,6 +28,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="profile">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
+     <property name="text">
+      <string>Profile</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="sign_in">
      <property name="styleSheet">
       <string notr="true">background: red;</string>
