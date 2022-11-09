@@ -53,6 +53,14 @@ class User:
             print(e)
             return False
 
+    def change_avatar(self, avatar="default.png"):
+        try:
+            res = self.dao.change_avatar(self.name, avatar)
+            return True
+        except DAO.UserDoesntExistError as e:
+            print(e)
+            return False
+
     def delete_user(self):
         try:
             res = self.dao.delete_user_by_name(self.name)

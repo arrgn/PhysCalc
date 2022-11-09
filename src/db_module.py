@@ -72,6 +72,15 @@ CREATE TABLE IF NOT EXISTS workspaces
         self.con.commit()
         return res
 
+    def change_avatar(self, name, avatar="default.png"):
+        user = self.get_user_by_name(name)
+        if not user:
+            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+        sql = """UPDATE users SET avatar=? WHERE id=?"""
+        res = self.cur.execute(sql, [path_to_userdata(avatar, name), user[0][0]])
+        self.con.commit()
+        return res
+
     def delete_user_by_name(self, name):
         if not self.get_user_by_name(name):
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")

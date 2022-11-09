@@ -1,8 +1,10 @@
+import shutil
+from os.path import basename
 from PyQt5 import Qt, uic
 from PyQt5.QtCore import Qt as Qt2
-from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel, QFileDialog
 from PyQt5.QtGui import QPixmap
-from path_module import path_to_file
+from path_module import path_to_file, path_to_userdata
 from config import user
 
 
@@ -11,6 +13,8 @@ class ProfileWindow(QDialog):
         super().__init__()
         self.username = QLineEdit()
         self.change_btn = QPushButton()
+        self.browse = QPushButton()
+        self.restore = QPushButton()
         self.error = QLabel()
         self.avatar = QLabel()
 
@@ -22,11 +26,10 @@ class ProfileWindow(QDialog):
         self.username.setText(user.get_user())
 
         self.change_btn.clicked.connect(self.change_username)
+        self.browse.clicked.connect(self.browse_files)
+        self.restore.clicked.connect(self.restore_avatar)
 
-        path_to_avatar = user.get_avatar()
-        if path_to_avatar:
-            smaller_pixmap = QPixmap(path_to_avatar).scaled(64, 64, Qt2.KeepAspectRatio, Qt2.FastTransformation)
-            self.avatar.setPixmap(smaller_pixmap)
+        self.load_avatar()
 
         self.show()
 
@@ -39,6 +42,26 @@ class ProfileWindow(QDialog):
             self.error.setText(f"Can't change name to {new_name}.")
             return
         self.error.setText(f"Name was successfully changed to {new_name}.")
+
+    def browse_files(self):
+        file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", user.get_user()),
+                                                "Image (*.png *.jpg)")[0]
+        try:
+            shutil.copy(file_name, path_to_userdata(basename(file_name), user.get_user()))
+        except shutil.SameFileError as e:
+            print(e)
+        user.change_avatar(basename(file_name))
+        self.load_avatar()
+
+    def restore_avatar(self):
+        user.change_avatar()
+        self.load_avatar()
+
+    def load_avatar(self):
+        path_to_avatar = user.get_avatar()
+        if path_to_avatar:
+            smaller_pixmap = QPixmap(path_to_avatar).scaled(64, 64, Qt2.KeepAspectRatio, Qt2.FastTransformation)
+            self.avatar.setPixmap(smaller_pixmap)
 
 
 if __name__ == "__main__":
