@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5 import Qt, uic, QtCore
+from PyQt5 import Qt, uic
 from PyQt5.QtWidgets import QWidget
 import pyqtgraph as pg
 from choose_plot_type import ChoosePlotWindow
@@ -41,7 +41,7 @@ class CalcsWindow:
 
         self.functions.clear()
 
-        res = ChoosePlotWindow(self.functions, self.start).get_result()
+        res = ChoosePlotWindow(self.functions, self.start)
 
         self.s_o, self.v_o = self.start
 
