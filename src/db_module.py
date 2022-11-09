@@ -57,9 +57,21 @@ CREATE TABLE IF NOT EXISTS workspaces (
         if self.get_user_by_name(name):
             raise self.UserExistsError(f"user with name {name} already exists")
         sql = """INSERT INTO users(username, password) VALUES(?, ?)"""
-        res = list(self.cur.execute(sql, [name, passwd]))
+        res = self.cur.execute(sql, [name, passwd])
         self.con.commit()
         return list(res)
+
+    def change_username(self, old_name, new_name):
+        user = self.get_user_by_name(old_name)
+        if not user:
+            raise self.UserDoesntExistError(f"user with name {old_name} doesnt exist")
+        candidate = self.get_user_by_name(new_name)
+        if candidate:
+            raise self.UserExistsError(f"user with name {new_name} already exists")
+        sql = """UPDATE users SET username=? WHERE id=?"""
+        res = self.cur.execute(sql, [new_name, user[0][0]])
+        self.con.commit()
+        return res
 
     def delete_user_by_name(self, name):
         if not self.get_user_by_name(name):
@@ -113,7 +125,14 @@ CREATE TABLE IF NOT EXISTS workspaces (
 if __name__ == "__main__":
     a = DAO()
     try:
+        a.change_username("123", "456")
+    except (DAO.UserDoesntExistError, DAO.UserExistsError) as e:
+        print(e)
+    try:
         a.add_user("default", "")
+    except DAO.UserExistsError as e:
+        print(e)
+    try:
         a.add_user("123", "qwerty")
     except DAO.UserExistsError as e:
         print(e)

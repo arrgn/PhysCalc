@@ -31,6 +31,15 @@ class User:
     def get_user(self):
         return self.name
 
+    def change_username(self, new_name):
+        try:
+            res = self.dao.change_username(self.name, new_name)
+            self.name = new_name
+            return True
+        except DAO.UserDoesntExistError as e:
+            print(e)
+            return False
+
     def delete_user(self):
         try:
             res = self.dao.delete_user_by_name(self.name)
