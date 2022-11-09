@@ -71,11 +71,10 @@ class ThirdWindow:
             self.keys = []
             self.mouse_tracking = False
             self.moving = None
+            self.hidden = None
+
 
             self.initUI()
-            self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
-                                      [220, 220, 220]]
-            self.repaint()
 
         def initUI(self):
             uic.loadUi("third_window.ui", self)
@@ -83,14 +82,14 @@ class ThirdWindow:
             self.mousebtn.setText("Никакая")
             self.btn1.setText("Линия")
             self.btn2.setText("Прямоугольник")
-            self.btn3.setText("Отмена")
+            # self.btn3.setText("Отмена")
             self.btn4.setText("Очистка")
             self.btn5.setText("Сохранить")
             self.btn6.setText("Загрузить")
             self.sandbox.setText("")
             self.btn1.clicked.connect(lambda: self.btn1_click())
             self.btn2.clicked.connect(lambda: self.btn2_click())
-            self.btn3.clicked.connect(lambda: self.btn3_click())
+            # self.btn3.clicked.connect(lambda: self.btn3_click())
             self.btn4.clicked.connect(lambda: self.btn4_click())
             self.btn5.clicked.connect(lambda: self.btn5_click())
             self.btn6.clicked.connect(lambda: self.btn6_click())
@@ -102,6 +101,7 @@ class ThirdWindow:
             self.spinBox.setValue(0)
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
+            self.colorslider.valueChanged.connect(self.colorchange)
 
         def renderf(self, qp):
 
@@ -118,13 +118,16 @@ class ThirdWindow:
 
             qp.setBrush(QBrush(Qt2.darkGray, Qt2.SolidPattern))
             for i in self.render_objects[2]:
-                if i == self.selected:
+                qp.setBrush(QBrush(Qt2.darkGray, Qt2.SolidPattern))
+                qp.setPen(QPen(Qt2.black, 3, Qt2.SolidLine))
+                if i == self.selected and i != self.hide:
                     qp.setPen(QPen(Qt2.black, 5, Qt2.DotLine))
                     qp.setBrush(QBrush(Qt2.lightGray, Qt2.DiagCrossPattern))
                     self.drawRect(i[0], i[1], qp)
-                    qp.setBrush(QBrush(Qt2.darkGray, Qt2.SolidPattern))
-                    qp.setPen(QPen(Qt2.black, 3, Qt2.SolidLine))
-                else:
+                elif i != self.hide:
+                    if len(i) == 3:
+                        qp.setBrush(QBrush(QColor(i[2]), Qt2.SolidPattern))
+                        qp.setPen(QPen(Qt2.black, 3, Qt2.SolidLine))
                     self.drawRect(i[0], i[1], qp)
                     self.update()
 
@@ -141,6 +144,8 @@ class ThirdWindow:
             qp.setBrush(QBrush())
             qp.setPen(QPen(Qt2.black, 3, Qt2.DashDotLine))
             if self.moving is not None:
+                qp.setPen(QPen(Qt2.black, 5, Qt2.DotLine))
+                qp.setBrush(QBrush(Qt2.lightGray, Qt2.DiagCrossPattern))
                 self.drawRect(self.moving[0], self.moving[1], qp)
 
         def rotate_rect_coards(self, center, w, h, angle):
@@ -224,6 +229,12 @@ class ThirdWindow:
                         self.ignore_rotate = True
                         self.dial.setValue(0)
                         self.ignore_rotate = False
+
+                    elif self.object_history[-1][0] == "moved":
+                        print(self.object_history)
+                        self.render_objects[2][self.render_objects[2].index(self.object_history[-1][0][2])] = self.object_history[-1][0][1]
+                        self.object_history.pop()
+
             except:
                 pass
             finally:
@@ -231,6 +242,14 @@ class ThirdWindow:
                     self.object_history.pop()
 
             self.update()
+
+        def colorchange(self, value):
+            mapped_value = int(value / 100 * 5)
+            colors = [Qt2.black, Qt2.darkGray, Qt2.gray, Qt2.lightGray, Qt2.white]
+            if len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 2:
+                self.render_objects[2][self.render_objects[2].index(self.selected)].append(colors[mapped_value])
+            elif len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 3:
+                self.render_objects[2][self.render_objects[2].index(self.selected)][2] = colors[mapped_value]
 
         def btn4_click(self):
             self.btn1_drawcoards = []
@@ -293,7 +312,6 @@ class ThirdWindow:
                     if self.object_history[-1][0] == "rotated" and self.object_history[-1][2][0] == self.selected[0]:
                         self.object_history.pop()
                     self.object_history.append(["rotated", self.dial.value(), self.selected])
-                    print(f"rotated at {self.dial.value()} degrees")
                 else:
                     self.spinBox.setValue(0)
                     self.dial.setValue(0)
@@ -415,10 +433,16 @@ class ThirdWindow:
 
             if self.selected is not None and self.mouse_btn == 2 and self.mouse_tracking:
                 buf = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
+                self.hide = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
                 dx, dy = mouse_coards[0] - self.start_coards[0], mouse_coards[1] - self.start_coards[1]
                 buf[0] = [[buf[0][0][0] + dx, buf[0][0][1] + dy], [buf[0][1][0] + dx, buf[0][1][1] + dy], [buf[0][2][0] + dx, buf[0][2][1] + dy],[buf[0][3][0] + dx, buf[0][3][1] + dy]]
-                if not self.RectAndWidgetCollision(buf[0], self.sandbox):
+                if not self.RectAndWidgetCollision(self.rotate_rect(buf[0], buf[1]), self.sandbox):
                     self.moving = buf
+                else:
+                    self.start_coards[0] = mouse_coards[0] - dx
+                    self.start_coards[1] = mouse_coards[1] - dy
+
+
 
 
 
@@ -426,7 +450,7 @@ class ThirdWindow:
             self.update()
 
         def mousePressEvent(self, event):
-            mouse_coards = (event.x(), event.y())
+            mouse_coards = [event.x(), event.y()]
             self.mouse_btn = event.button()
             mouse_in_sandbox = self.mouse_in_widget(mouse_coards, self.sandbox)[-1]
             self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
@@ -457,13 +481,15 @@ class ThirdWindow:
                 if self.selected is not None:
                     print(f"selected RECT {self.selected} with number {self.render_objects[2].index(self.selected)}")
                 else:
-                    print("nothing selected", self.render_objects[2], mouse_coards)
+                    print("nothing selected")
 
             if self.selected is None:
                 self.dial.hide()
+                self.colorslider.hide()
                 self.spinBox.hide()
             else:
                 self.dial.show()
+                self.colorslider.show()
                 self.spinBox.show()
 
             self.update()
@@ -474,8 +500,10 @@ class ThirdWindow:
             elif (event.button() == Qt2.RightButton):
                 self.mousebtn.setText("Правая")
 
+
+
         def mouseReleaseEvent(self, event):
-            mouse_coards = (event.x(), event.y())
+            mouse_coards = [event.x(), event.y()]
             mouse_btn = event.button()
             self.mouse_btn = 0
             self.ignore_rotate = True
@@ -498,7 +526,21 @@ class ThirdWindow:
                 self.btn2_wait_to_click = 0
 
             if self.moving and self.mouse_tracking:
-                pass
+                self.mouse_tracking = False
+                self.object_history.append(["moved", self.render_objects[2][self.render_objects[2].index(self.selected)], self.moving])
+                self.render_objects[2][self.render_objects[2].index(self.selected)] = self.moving
+                self.moving = None
+                self.hide = None
+                self.selected = None
+
+            if self.selected is None:
+                self.dial.hide()
+                self.colorslider.hide()
+                self.spinBox.hide()
+            else:
+                self.dial.show()
+                self.colorslider.show()
+                self.spinBox.show()
 
             self.mousebtn.setText("Никакая")
             self.update()

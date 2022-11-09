@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1002</width>
-    <height>550</height>
+    <height>566</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,6 +31,19 @@
      </item>
      <item>
       <widget class="QSpinBox" name="spinBox"/>
+     </item>
+     <item>
+      <widget class="QSlider" name="colorslider">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="verticalSpacer">
