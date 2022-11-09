@@ -1,57 +1,12 @@
-from PyQt5 import Qt, QtCore, uic
+from PyQt5 import Qt
 from PyQt5.QtCore import QPropertyAnimation
-from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame, QGridLayout
+from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from path_module import path_to_file
+from side_menu import SideMenu
 
 
 class Window(QWidget):
-    class SideMenu():
-        def __init__(self, widget: QWidget, btn: QPushButton, path: str, width: int, duration: int, left: bool) -> None:
-            self.menu = QFrame()
-            self.btn = btn
-            self.path = path
-            self.duration = duration
-            self.widget = widget
-            self.width = width
-            self.left = left
-            self.animation = QPropertyAnimation()
-
-            self.init_ui()
-
-        def init_ui(self):
-            self.menu = QFrame(self.widget)
-            uic.loadUi(path_to_file(self.path), self.menu)
-
-            self.animation = QPropertyAnimation(self.menu, b"size", self.widget.ui)
-            self.update_animation()
-            self.animation.setDuration(self.duration)
-
-        def show_hide_menu(self):
-            if self.btn.isChecked():
-                self.btn.hide()
-                self.animation.setDirection(QtCore.QAbstractAnimation.Forward)
-            else:
-
-                self.animation.setDirection(QtCore.QAbstractAnimation.Backward)
-                self.btn.show()
-            self.animation.start()
-
-        def resizeEvent(self):
-            self.update_animation()
-
-        def update_animation(self):
-            if self.left:
-                self.menu.setGeometry(QtCore.QRect(0, 0, self.width, self.widget.height()))
-            else:
-                self.menu.setGeometry(QtCore.QRect(self.widget.width() - self.width,
-                                                   0, self.width, self.widget.height()))
-            if not self.btn.isChecked():
-                self.menu.resize(QtCore.QSize(0, 0))
-            self.animation.setStartValue(QtCore.QSize(0, self.widget.height()))
-            self.animation.setEndValue(QtCore.QSize(self.width, self.widget.height()))
-
     def __init__(self):
         super().__init__()
         self.ui = QStackedWidget()
@@ -75,8 +30,8 @@ class Window(QWidget):
         self.drop_btn = QPushButton(self)
         self.auth_btn = QPushButton(self)
 
-        self.drop_menu = self.SideMenu(self, self.drop_btn, "drop_menu.ui", 121, 200, True)
-        self.auth_menu = self.SideMenu(self, self.auth_btn, "auth_menu.ui", 121, 200, False)
+        self.drop_menu = SideMenu(self, self.drop_btn, "drop_menu.ui", 121, 200, True)
+        self.auth_menu = SideMenu(self, self.auth_btn, "auth_menu.ui", 121, 200, False)
 
         self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
         self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
@@ -107,8 +62,8 @@ class Window(QWidget):
         self.auth_menu.show_hide_menu()
 
     def resizeEvent(self, event):
-        self.drop_menu.resizeEvent()
-        self.auth_menu.resizeEvent()
+        self.drop_menu.resize_event()
+        self.auth_menu.resize_event()
         self.auth_btn.move(self.width() - 30, 5)
 
     def show(self):
