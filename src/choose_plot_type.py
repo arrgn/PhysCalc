@@ -43,6 +43,7 @@ class ChoosePlotWindow(QDialog):
 
         self.accel.click()
         self.list_add_item()
+        self.show()
 
     def change_plot_type(self):
         if self.sender().objectName() == "accel":
