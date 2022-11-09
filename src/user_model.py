@@ -31,6 +31,16 @@ class User:
     def get_user(self):
         return self.name
 
+    def get_avatar(self):
+        try:
+            res = self.dao.get_user_by_name(self.name)
+            if not res:
+                raise DAO.UserDoesntExistError(f"user with name {self.name} doesnt exist")
+            return res[0][2]
+        except DAO.UserDoesntExistError as e:
+            print(e)
+            return False
+
     def change_username(self, new_name):
         try:
             res = self.dao.change_username(self.name, new_name)

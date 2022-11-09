@@ -1,6 +1,7 @@
 from PyQt5 import Qt, uic
+from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel
-
+from PyQt5.QtGui import QPixmap
 from path_module import path_to_file
 from config import user
 
@@ -11,6 +12,7 @@ class ProfileWindow(QDialog):
         self.username = QLineEdit()
         self.change_btn = QPushButton()
         self.error = QLabel()
+        self.avatar = QLabel()
 
         self.init_ui()
 
@@ -20,6 +22,11 @@ class ProfileWindow(QDialog):
         self.username.setText(user.get_user())
 
         self.change_btn.clicked.connect(self.change_username)
+
+        path_to_avatar = user.get_avatar()
+        if path_to_avatar:
+            smaller_pixmap = QPixmap(path_to_avatar).scaled(64, 64, Qt2.KeepAspectRatio, Qt2.FastTransformation)
+            self.avatar.setPixmap(smaller_pixmap)
 
         self.show()
 

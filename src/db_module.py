@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from path_module import path_to_file
+from path_module import path_to_file, path_to_userdata
 
 
 class DAO:
@@ -18,22 +18,21 @@ class DAO:
         self.con = connect(path_to_file(path_to_db))
         self.cur = self.con.cursor()
         build = """
-CREATE TABLE IF NOT EXISTS users (
-    id       INTEGER           PRIMARY KEY
-                           UNIQUE
-                           NOT NULL,
-    username VARCHAR (255) UNIQUE
-                           NOT NULL,
-    password VARCHAR (255) NOT NULL
+CREATE TABLE IF NOT EXISTS users
+(
+    id       INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    username VARCHAR(255) UNIQUE        NOT NULL,
+    password VARCHAR(255)               NOT NULL,
+    avatar   TEXT                       NOT NULL
 );
         """
         self.cur.execute(build)
         build = """
-CREATE TABLE IF NOT EXISTS workspaces (
-    user_id      REFERENCES users (id) ON DELETE CASCADE
-                 NOT NULL,
-    file    TEXT NOT NULL,
-    title    VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS workspaces
+(
+    user_id REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+    file        TEXT                                NOT NULL,
+    title       VARCHAR(255)                        NOT NULL,
     description TEXT
 );
         """
@@ -42,22 +41,22 @@ CREATE TABLE IF NOT EXISTS workspaces (
             self.add_user(default_user[0], default_user[1])
 
     def get_user_by_name(self, name):
-        sql = """SELECT id, username FROM users WHERE username=?"""
+        sql = """SELECT id, username, avatar FROM users WHERE username=?"""
         res = self.cur.execute(sql, [name])
         return list(res)
 
     def get_checked_user(self, name, password):
         if not self.get_user_by_name(name):
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
-        sql = """SELECT id, username FROM users WHERE username=? AND password=?"""
+        sql = """SELECT id, username, avatar FROM users WHERE username=? AND password=?"""
         res = self.cur.execute(sql, [name, password])
         return list(res)
 
-    def add_user(self, name, passwd):
+    def add_user(self, name, passwd, avatar="default.png"):
         if self.get_user_by_name(name):
             raise self.UserExistsError(f"user with name {name} already exists")
-        sql = """INSERT INTO users(username, password) VALUES(?, ?)"""
-        res = self.cur.execute(sql, [name, passwd])
+        sql = """INSERT INTO users(username, password, avatar) VALUES(?, ?, ?)"""
+        res = self.cur.execute(sql, [name, passwd, path_to_userdata(avatar, name)])
         self.con.commit()
         return list(res)
 
