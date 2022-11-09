@@ -4,7 +4,7 @@ from PyQt5 import Qt, uic
 from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel, QFileDialog
 from PyQt5.QtGui import QPixmap
-from path_module import path_to_file, path_to_userdata
+from path_module import path_to_file, path_to_userdata, copy_file
 from config import user
 
 
@@ -46,10 +46,7 @@ class ProfileWindow(QDialog):
     def browse_files(self):
         file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", user.get_user()),
                                                 "Image (*.png *.jpg)")[0]
-        try:
-            shutil.copy(file_name, path_to_userdata(basename(file_name), user.get_user()))
-        except shutil.SameFileError as e:
-            print(e)
+        copy_file(file_name, user.get_user())
         user.change_avatar(basename(file_name))
         self.load_avatar()
 
