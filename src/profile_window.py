@@ -43,7 +43,7 @@ class ProfileWindow(QDialog):
         self.error.setText(f"Name was successfully changed to {new_name}.")
 
     def browse_files(self):
-        file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", user.get_user()),
+        file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", str(user.get_user_id())),
                                                 "Image (*.png *.jpg)")[0]
         if file_name == "":
             return
