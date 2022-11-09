@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
 from side_menu import SideMenu
+from auth_window import AuthWindow
 
 
 class Window(QWidget):
@@ -32,11 +33,10 @@ class Window(QWidget):
 
         self.drop_menu = SideMenu(self, self.drop_btn, "drop_menu.ui", 121, 200, True)
         self.auth_menu = SideMenu(self, self.auth_btn, "auth_menu.ui", 121, 200, False)
-
         self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
         self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
-        self.auth_menu.menu.sign_in.clicked.connect(self.auth_btn.click)
-        self.auth_menu.menu.sign_up.clicked.connect(self.auth_btn.click)
+        self.auth_menu.menu.sign_in.clicked.connect(lambda: AuthWindow(True).exec())
+        self.auth_menu.menu.sign_up.clicked.connect(lambda: AuthWindow(False).exec())
 
         self.drop_btn.setCheckable(True)
         self.drop_btn.setGeometry(Qt.QRect(5, 5, 25, 25))

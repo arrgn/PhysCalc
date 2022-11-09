@@ -9,7 +9,12 @@ class DAO:
     class UserDoesntExistError(Exception):
         pass
 
-    def __init__(self, path_to_db="db.db", default_user=["default", ""]):
+    class WorkspaceNotFoundError(Exception):
+        pass
+
+    def __init__(self, path_to_db="db.db", default_user=None):
+        if default_user is None:
+            default_user = ["default", ""]
         self.con = connect(path_to_file(path_to_db))
         self.cur = self.con.cursor()
         build = """
@@ -37,13 +42,14 @@ CREATE TABLE IF NOT EXISTS workspaces (
             self.add_user(default_user[0], default_user[1])
 
     def get_user_by_name(self, name):
-        sql = """SELECT * FROM users WHERE username=?"""
-        return list(self.cur.execute(sql, [name]))
+        sql = """SELECT id, username FROM users WHERE username=?"""
+        res = self.cur.execute(sql, [name])
+        return list(res)
 
     def get_checked_user(self, name, password):
         if not self.get_user_by_name(name):
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
-        sql = """SELECT * FROM users WHERE username=? AND password=?"""
+        sql = """SELECT id, username FROM users WHERE username=? AND password=?"""
         res = self.cur.execute(sql, [name, password])
         return list(res)
 
@@ -63,10 +69,10 @@ CREATE TABLE IF NOT EXISTS workspaces (
         self.con.commit()
         return list(res)
 
-    def add_workspace_to_user(self, name, file, title, description):
-        user = self.get_user_by_name(name)
+    def add_workspace_to_user(self, username, file, title, description):
+        user = self.get_user_by_name(username)
         if not user:
-            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+            raise self.UserDoesntExistError(f"user with name {username} doesnt exist")
         sql = """INSERT INTO workspaces VALUES(?, ?, ?, ?)"""
         res = self.cur.execute(sql, [user[0][0], file, title, description])
         self.con.commit()
@@ -76,17 +82,30 @@ CREATE TABLE IF NOT EXISTS workspaces (
         user = self.get_user_by_name(name)
         if not user:
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
-        sql = """SELECT * FROM workspaces JOIN users ON id=user_id WHERE id=?"""
+        sql = """SELECT title, file, description FROM workspaces JOIN users ON id=user_id WHERE id=?"""
         res = self.cur.execute(sql, [user[0][0]])
         self.con.commit()
-        return list(map(lambda x: x[:4], res))
+        return list(res)
 
-    def delete_workspace_from_user(self, name, file):
+    def get_workspace(self, name, ws_name):
         user = self.get_user_by_name(name)
         if not user:
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
-        sql = """DELETE FROM workspaces WHERE user_id=? AND file=?"""
-        res = self.cur.execute(sql, [user[0][0], file])
+        sql = """SELECT title, file, description FROM workspaces JOIN users ON id=user_id WHERE id=? AND title=?"""
+        res = self.cur.execute(sql, [user[0][0], ws_name])
+        if not res:
+            raise self.WorkspaceNotFoundError(f"workspace with name {ws_name} was not found at user {name}")
+        return list(res)
+
+    def delete_workspace_from_user(self, name, ws_name):
+        user = self.get_user_by_name(name)
+        if not user:
+            raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
+        workspace = self.get_workspace(name, ws_name)
+        if not workspace:
+            raise self.WorkspaceNotFoundError(f"workspace with name {ws_name} was not found at user {name}")
+        sql = """DELETE FROM workspaces WHERE user_id=? AND title=?"""
+        res = self.cur.execute(sql, [user[0][0], ws_name])
         self.con.commit()
         return list(res)
 
@@ -94,12 +113,18 @@ CREATE TABLE IF NOT EXISTS workspaces (
 if __name__ == "__main__":
     a = DAO()
     try:
+        a.add_user("default", "")
         a.add_user("123", "qwerty")
     except DAO.UserExistsError as e:
         print(e)
     a.add_workspace_to_user("123", "a.txt", "MFW", "My First Workspace")
-    print(a.get_user_by_name("123"))
+    a.add_workspace_to_user("123", "b.txt", "MSW", "HAHAHA")
+    a.add_workspace_to_user("default", "b.txt", "MFW", "HAHAHA")
+    print(a.get_user_by_name("default"))
     workspaces = a.get_workspaces_by_user("123")
-    if len(workspaces) > 5:
-        a.delete_workspace_from_user("123", "a.txt")
+    if len(workspaces) > 10:
+        a.delete_workspace_from_user("123", "MFW")
+        a.delete_workspace_from_user("123", "MSW")
+        print(a.get_workspaces_by_user("123"))
+    print(a.get_workspace("123", "MFW"))
     print(a.get_workspaces_by_user("123"))
