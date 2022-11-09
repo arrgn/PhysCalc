@@ -22,6 +22,7 @@ class SideMenu:
         self.menu = QFrame(self.widget)
         uic.loadUi(path_to_file(self.path), self.menu)
 
+        self.menu.closer.clicked.connect(self.close)
         self.animation = QPropertyAnimation(self.menu, b"size", self.widget.ui)
         self.update_animation()
         self.animation.setDuration(self.duration)
@@ -47,5 +48,9 @@ class SideMenu:
                                                0, self.width, self.widget.height()))
         if not self.btn.isChecked():
             self.menu.resize(QtCore.QSize(0, 0))
-        self.animation.setStartValue(QtCore.QSize(0, self.widget.height()))
+        self.animation.setStartValue(QtCore.QSize(self.width, 0))
         self.animation.setEndValue(QtCore.QSize(self.width, self.widget.height()))
+
+    def close(self):
+        self.btn.setChecked(False)
+        self.show_hide_menu()

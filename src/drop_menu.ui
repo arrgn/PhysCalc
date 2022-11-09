@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-
  <class>Frame</class>
  <widget class="QFrame" name="Frame">
   <property name="geometry">
@@ -18,6 +17,16 @@
    <string notr="true">background: rgba(0,25,255,0.5);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QPushButton" name="closer">
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
+     <property name="text">
+      <string>CLose</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QPushButton" name="w1_btn">
      <property name="styleSheet">
