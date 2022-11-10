@@ -1,8 +1,9 @@
 import numpy as np
-from PyQt5 import Qt, uic, QtCore  # type: ignore
+from PyQt5 import Qt, uic, QtCore
 from PyQt5.QtWidgets import QWidget
 import pyqtgraph as pg
 from path_module import path_to_file
+from logging import getLogger
 
 
 class BallisticWindow:
@@ -35,9 +36,10 @@ class BallisticWindow:
             angle = float(self.ui.AngleInput.text()) * self.deg2rad
             velocity = float(self.ui.VelocityInput.text())
             g = float(self.ui.GInput.text())
-        except ValueError as e:
-            print(e)
-            return
+        except ValueError:
+            getLogger(__name__).exception("Tracked exception occurred!")
+        except Exception:
+            getLogger(__name__).exception("Abnormal exception occurred!")
 
         x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
         y = self.f(x, angle, velocity, g)
@@ -48,8 +50,8 @@ class BallisticWindow:
         try:
             self.ui.Plot.setYRange(0, np.max(y) * 1.5)
             self.ui.Plot.setXRange(0, np.max(y) * 1.5)
-        except:
-            pass
+        except Exception:
+            getLogger(__name__).exception("Tracked exception occurred!")
 
     def f(self, x, angle, velocity, g):
         t = x / (velocity * np.cos(angle))

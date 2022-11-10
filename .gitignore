@@ -135,6 +135,7 @@ dmypy.json
 .vs/
 .idea/
 
-# Ignore local database
+# Ignore local information
 src/db.db
 src/userdata/
+src/logs/PhysCalc.log

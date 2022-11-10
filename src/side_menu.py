@@ -1,7 +1,6 @@
 from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QWidget, QPushButton, QFrame
 from PyQt5 import QtCore, uic
-
 from src.path_module import path_to_file
 
 

@@ -6,6 +6,9 @@ from calcs import CalcsWindow
 from side_menu import SideMenu
 from auth_window import AuthWindow
 from profile_window import ProfileWindow
+from path_module import path_to_file, create_dir
+import logging.config
+import logging
 
 
 class Window(QWidget):
@@ -74,6 +77,9 @@ class Window(QWidget):
 
 
 if __name__ == "__main__":
+    create_dir("logs")
+    logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
+    logging.error("123")
     app = Qt.QApplication([])
     w = Window()
     w.show()
