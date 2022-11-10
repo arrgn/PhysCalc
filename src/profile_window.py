@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel, QFileDialog
 from PyQt5.QtGui import QPixmap
 from path_module import path_to_file, path_to_userdata, copy_file
 from config import user
-import logging
+from loggers import logger
 
 
 class ProfileWindow(QDialog):
@@ -47,7 +47,7 @@ class ProfileWindow(QDialog):
         file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", str(user.get_user_id())),
                                                 "Image (*.png *.jpg)")[0]
         if file_name == "":
-            logging.getLogger(__name__).warning("Got null filename")
+            logger.warning("Got null filename")
             return
         copy_file(file_name, str(user.get_user_id()))
         user.change_avatar(basename(file_name))
@@ -63,7 +63,7 @@ class ProfileWindow(QDialog):
             smaller_pixmap = QPixmap(path_to_avatar).scaled(64, 64, Qt2.KeepAspectRatio, Qt2.FastTransformation)
             self.avatar.setPixmap(smaller_pixmap)
         else:
-            logging.getLogger(__name__).warning("Path doesnt exist!")
+            logger.warning("Path doesnt exist!")
 
 
 if __name__ == "__main__":

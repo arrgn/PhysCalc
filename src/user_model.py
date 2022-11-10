@@ -1,6 +1,6 @@
 from db_module import DAO
 from path_module import path_to_userdata, copy_file, create_user_dir
-from logging import getLogger
+from loggers import logger
 
 
 class User:
@@ -20,9 +20,9 @@ class User:
             copy_file(path_to_userdata("default.png", "default"), self.id)
             return True
         except DAO.UserExistsError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def set_user(self, name, password):
@@ -32,9 +32,9 @@ class User:
             self.id = str(self.dao.get_user_by_name(self.name)[0][0])
             return res
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def get_user(self):
@@ -50,9 +50,9 @@ class User:
                 raise DAO.UserDoesntExistError(f"user with name {self.name} doesnt exist")
             return res[0][2]
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def change_username(self, new_name):
@@ -61,11 +61,11 @@ class User:
             self.name = new_name
             return True
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except DAO.UserExistsError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def change_avatar(self, avatar="default.png"):
@@ -73,9 +73,9 @@ class User:
             res = self.dao.change_avatar(self.name, avatar)
             return True
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def delete_user(self):
@@ -83,9 +83,9 @@ class User:
             res = self.dao.delete_user_by_name(self.name)
             return res
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def get_workspaces(self):
@@ -93,9 +93,9 @@ class User:
             res = self.dao.get_workspaces_by_user(self.name)
             return res
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def get_workspace(self, ws_name):
@@ -103,9 +103,9 @@ class User:
             res = self.dao.get_workspace(self.name, ws_name)
             return res
         except (DAO.UserDoesntExistError, DAO.WorkspaceNotFoundError):
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def add_workspace(self, ws_name, file, description=""):
@@ -113,9 +113,9 @@ class User:
             self.dao.add_workspace_to_user(self.name, ws_name, file, description)
             return True
         except DAO.UserDoesntExistError:
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False
 
     def delete_workspace(self, ws_name):
@@ -123,7 +123,7 @@ class User:
             res = self.dao.delete_workspace_from_user(self.name, ws_name)
             return res
         except (DAO.UserDoesntExistError, DAO.WorkspaceNotFoundError):
-            getLogger(__name__).exception("Tracked exception occurred!")
+            logger.exception("Tracked exception occurred!")
         except Exception:
-            getLogger(__name__).exception("Abnormal exception occurred!")
+            logger.exception("Abnormal exception occurred!")
         return False

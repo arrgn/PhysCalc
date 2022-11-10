@@ -79,7 +79,6 @@ class Window(QWidget):
 if __name__ == "__main__":
     create_dir("logs")
     logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
-    logging.error("123")
     app = Qt.QApplication([])
     w = Window()
     w.show()
