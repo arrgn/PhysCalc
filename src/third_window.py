@@ -207,6 +207,7 @@ class ThirdWindow:
             self.btn1_wait_to_click = -1
             self.btn2_wait_to_click = -1
             self.btn5_wait_to_click = -1
+            self.btn7_wait_to_click = -1
             self.selected = None
 
         def btn1_click(self):
@@ -327,6 +328,8 @@ class ThirdWindow:
                                                       self.sandbox) or self.RectAnfRenderObjCollision(
                             self.rotate_rect(self.selected[0], val), self.render_objects):
                         val -= 1
+                    if val < 0:
+                        val = 360 - val
                     self.render_objects[2][self.render_objects[2].index(self.selected)][1] = val
                     self.selected[1] = val
                     self.spinBox.setValue(val)
@@ -486,7 +489,7 @@ class ThirdWindow:
             return [a1[0], a1[1], abs(rect[2]), abs(rect[3])]
 
         def keyPressEvent(self, event):
-            if event.key() in [Qt2.Key_Delete, 16777219]:
+            if event.key() in [Qt2.Key_Delete, Qt2.Key_Backspace]:
                 self.delete_selected()
             if event.key() == Qt2.Key_Z and Qt2.Key_Control in self.keys:
                 self.btn3_click()
