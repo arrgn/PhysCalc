@@ -29,7 +29,7 @@ class CalcsWindow:
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("Calcs.ui"), self.ui)
+        uic.loadUi(path_to_file("uis", "Calcs.ui"), self.ui)
 
         self.ui.add_btn.clicked.connect(lambda: self.build_plot())
 

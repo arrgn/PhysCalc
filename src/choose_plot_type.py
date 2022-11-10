@@ -2,7 +2,7 @@ from PyQt5 import Qt, uic
 from PyQt5.QtWidgets import QDialog, QRadioButton, QListWidget
 from typing import List
 
-from config import path_to_file
+from path_module import path_to_file
 
 
 class ChoosePlotWindow(QDialog):
@@ -21,7 +21,7 @@ class ChoosePlotWindow(QDialog):
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("input_plot.ui"), self)
+        uic.loadUi(path_to_file("uis", "input_plot.ui"), self)
 
         self.buttonBox.accepted.connect(lambda: self.done(self.inp_result))
 
@@ -43,6 +43,10 @@ class ChoosePlotWindow(QDialog):
 
         self.accel.click()
         self.list_add_item()
+
+        ssh_file = path_to_file("themes", "SpyBot.qss")
+        with open(ssh_file, "r") as fh:
+            self.setStyleSheet(fh.read())
         self.show()
 
     def change_plot_type(self):
