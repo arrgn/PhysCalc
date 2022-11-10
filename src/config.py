@@ -1,6 +1,10 @@
-from pathlib import Path
-from os import path
+from db_module import DAO
+from user_model import User
 
+path_to_db = "db.db"
+# default_user: list[str(username), str(password)]
+default_user = ["guest", ""]
 
-def path_to_file(filename: str) -> str:
-    return path.join(Path(__file__).parent.resolve(), filename)
+dao = DAO(path_to_db)
+user = User(database=dao)
+user.add_user(*default_user)

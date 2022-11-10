@@ -1,10 +1,9 @@
 import numpy as np
-from numpy import inf
+from numpy import inf  # need to calculations
 from PyQt5 import Qt, uic
 from PyQt5.QtWidgets import QWidget
-import pyqtgraph as pg
 from choose_plot_type import ChoosePlotWindow
-from config import path_to_file
+from path_module import path_to_file
 from sympy import *
 
 

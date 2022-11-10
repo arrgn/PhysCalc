@@ -1,83 +1,80 @@
-from PyQt5 import Qt, QtCore, uic
+from PyQt5 import Qt
 from PyQt5.QtCore import QPropertyAnimation
-from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QFrame
+from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from config import path_to_file
+from side_menu import SideMenu
+from auth_window import AuthWindow
+from profile_window import ProfileWindow
+from path_module import path_to_file, create_dir
+import logging.config
+import logging
 
 
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-
         self.ui = QStackedWidget()
-        self.drop_menu = QWidget()
-        self.menu_btn = QPushButton()
+        self.layout_ = QGridLayout()
+        self.drop_menu = None
+        self.auth_menu = None
+        self.drop_btn = QPushButton()
+        self.auth_btn = QPushButton()
         self.animation = QPropertyAnimation()
-        self.frame2 = QFrame()
-        self.w1_btn = QPushButton()
-        self.w2_btn = QPushButton()
-
         self.init_ui()
 
     def init_ui(self):
-        self.setGeometry(0, 0, 640, 640)
-        self.ui = QStackedWidget(self)
-        self.ui.setGeometry(0, 0, 640, 640)
+        self.setLayout(self.layout_)
+        self.layout_.addWidget(self.ui)
 
+        self.setGeometry(0, 0, 640, 640)
+        self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
 
-        uic.loadUi(path_to_file("Drop_menu.ui"), self.drop_menu)
+        self.drop_btn = QPushButton(self)
+        self.auth_btn = QPushButton(self)
 
-        # Here is example
-        self.frame2 = QFrame(self)
-        self.frame2.setGeometry(QtCore.QRect(0, 0, 0, 480))
-        self.frame2.setStyleSheet("background:red;")
-        self.frame2.setFrameShape(QFrame.StyledPanel)
-        self.frame2.setFrameShadow(QFrame.Raised)
-        self.frame2.setObjectName("frame2")
+        self.drop_menu = SideMenu(self, self.drop_btn, path_to_file("uis", "drop_menu.ui"), 121, 200, True)
+        self.auth_menu = SideMenu(self, self.auth_btn, path_to_file("uis", "auth_menu.ui"), 121, 200, False)
+        self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
+        self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
+        self.auth_menu.menu.sign_in.clicked.connect(lambda: AuthWindow(True).exec())
+        self.auth_menu.menu.sign_up.clicked.connect(lambda: AuthWindow(False).exec())
+        self.auth_menu.menu.profile.clicked.connect(lambda: ProfileWindow().exec())
 
-        self.w1_btn = QPushButton(self.frame2)
-        self.w1_btn.setText("Ballistics window")
-        self.w1_btn.setGeometry(QtCore.QRect(0, 0, 121, 20))
-        self.w1_btn.setStyleSheet("background: green;")
-        self.w1_btn.setObjectName("w1_btn")
-        self.w1_btn.clicked.connect(self.switch_window)
+        self.drop_btn.setCheckable(True)
+        self.drop_btn.setGeometry(Qt.QRect(5, 5, 25, 25))
+        self.drop_btn.clicked.connect(self.drop_menu.show_hide_menu)
 
-        self.w2_btn = QPushButton(self.frame2)
-        self.w2_btn.setText("Calcs window")
-        self.w2_btn.setGeometry(QtCore.QRect(0, 20, 121, 20))
-        self.w2_btn.setStyleSheet("background: cyan;")
-        self.w2_btn.setObjectName("w2_btn")
-        self.w2_btn.clicked.connect(self.switch_window)
+        self.auth_btn.setCheckable(True)
+        self.auth_btn.setGeometry(Qt.QRect(self.width() - 30, 5, 25, 25))
+        self.auth_btn.clicked.connect(self.auth_menu.show_hide_menu)
 
-        self.animation = QPropertyAnimation(self.frame2, b"size", self.ui)
-        self.animation.setStartValue(QtCore.QSize(0, self.ui.height()))
-        self.animation.setEndValue(QtCore.QSize(121, self.ui.height()))
-        self.animation.setDuration(200)
+        self.drop_menu.show_hide_menu()
+        self.auth_menu.show_hide_menu()
+        self.setWindowTitle("Ballistics")
 
-        self.menu_btn = QPushButton(self)
-        self.menu_btn.setCheckable(True)
-        self.menu_btn.setGeometry(Qt.QRect(5, 5, 25, 25))
-        self.menu_btn.setStyleSheet("background: blue")
-        self.menu_btn.clicked.connect(self.show_hide_menu)
+        ssh_file = path_to_file("themes", "SpyBot.qss")
+        with open(ssh_file, "r") as fh:
+            self.setStyleSheet(fh.read())
 
     def switch_window(self):
-        if self.ui.sender().objectName() == self.w1_btn.objectName():
+        if self.ui.sender().objectName() == self.drop_menu.menu.w1_btn.objectName():
+            self.setWindowTitle("Ballistics")
             self.ui.setCurrentIndex(0)
-        elif self.ui.sender().objectName() == self.w2_btn.objectName():
+        elif self.ui.sender().objectName() == self.drop_menu.menu.w2_btn.objectName():
+            self.setWindowTitle("Calcs")
             self.ui.setCurrentIndex(1)
-        self.menu_btn.setChecked(False)
-        self.show_hide_menu()
+        self.drop_btn.setChecked(False)
+        self.auth_btn.setChecked(False)
+        self.drop_menu.show_hide_menu()
+        self.auth_menu.show_hide_menu()
 
-    def show_hide_menu(self):
-        if self.menu_btn.isChecked():
-            self.animation.setDirection(QtCore.QAbstractAnimation.Forward)
-            self.animation.start()
-        else:
-            self.animation.setDirection(QtCore.QAbstractAnimation.Backward)
-            self.animation.start()
+    def resizeEvent(self, event):
+        self.drop_menu.resize_event()
+        self.auth_menu.resize_event()
+        self.auth_btn.move(self.width() - 30, 5)
 
     def show(self):
         self.ui.show()
@@ -85,6 +82,8 @@ class Window(QWidget):
 
 
 if __name__ == "__main__":
+    create_dir("logs")
+    logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
     app = Qt.QApplication([])
     w = Window()
     w.show()

@@ -1,8 +1,9 @@
 import numpy as np
-from PyQt5 import Qt, uic, QtCore  # type: ignore
+from PyQt5 import Qt, uic, QtCore
 from PyQt5.QtWidgets import QWidget
 import pyqtgraph as pg
-from config import path_to_file
+from path_module import path_to_file
+from loggers import logger
 
 
 class BallisticWindow:
@@ -15,15 +16,15 @@ class BallisticWindow:
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("Ballistics.ui"), self.ui)
+        uic.loadUi(path_to_file("uis", "ballistics.ui"), self.ui)
 
         self.ui.AngleInput.setText("30")
         self.ui.VelocityInput.setText("10")
         self.ui.GInput.setText("9.81")
 
-        self.ui.AngleInput.textChanged.connect(self.build_plot)
-        self.ui.VelocityInput.textChanged.connect(self.build_plot)
-        self.ui.GInput.textChanged.connect(self.build_plot)
+        self.ui.AngleInput.textChanged.connect(lambda: self.build_plot())
+        self.ui.VelocityInput.textChanged.connect(lambda: self.build_plot())
+        self.ui.GInput.textChanged.connect(lambda: self.build_plot())
 
         self.ui.Plot.setAspectLocked()
         self.ui.Plot.setLimits(xMin=0, yMin=0)
@@ -35,8 +36,8 @@ class BallisticWindow:
             angle = float(self.ui.AngleInput.text()) * self.deg2rad
             velocity = float(self.ui.VelocityInput.text())
             g = float(self.ui.GInput.text())
-        except ValueError as e:
-            print(e)
+        except ValueError:
+            logger.exception("Tracked exception occurred!")
             return
 
         x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
@@ -48,8 +49,8 @@ class BallisticWindow:
         try:
             self.ui.Plot.setYRange(0, np.max(y) * 1.5)
             self.ui.Plot.setXRange(0, np.max(y) * 1.5)
-        except:
-            pass
+        except Exception:
+            logger.exception("Tracked exception occurred!")
 
     def f(self, x, angle, velocity, g):
         t = x / (velocity * np.cos(angle))
