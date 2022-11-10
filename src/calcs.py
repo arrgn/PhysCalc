@@ -198,7 +198,8 @@ class CalcsWindow:
                 self.s_o = y_s[-1]
 
     def sympy_to_numpy(self, expr: str):
-        return expr.replace("asin", "np.ASIN") \
+        return expr\
+            .replace("asin", "np.ASIN") \
             .replace("acos", "np.ACOS") \
             .replace("atan", "np.ATAN") \
             .replace("acos", "arcctg") \
