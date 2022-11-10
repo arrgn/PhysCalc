@@ -1,6 +1,7 @@
 import json
 import random
 import sys
+from copy import deepcopy
 from math import radians, cos, sin
 
 from PyQt5 import QtCore
@@ -9,7 +10,6 @@ from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
 from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel
 from PyQt5.QtWidgets import QWidget
-from copy import deepcopy
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -72,7 +72,6 @@ class ThirdWindow:
             self.mouse_tracking = False
             self.moving = None
             self.hidden = None
-
 
             self.initUI()
 
@@ -232,7 +231,8 @@ class ThirdWindow:
 
                     elif self.object_history[-1][0] == "moved":
                         print(self.object_history)
-                        self.render_objects[2][self.render_objects[2].index(self.object_history[-1][0][2])] = self.object_history[-1][0][1]
+                        self.render_objects[2][self.render_objects[2].index(self.object_history[-1][0][2])] = \
+                        self.object_history[-1][0][1]
                         self.object_history.pop()
 
             except:
@@ -252,13 +252,15 @@ class ThirdWindow:
                 self.render_objects[2][self.render_objects[2].index(self.selected)][2] = colors[mapped_value]
 
         def btn4_click(self):
-            self.btn1_drawcoards = []
-            self.render_objects = [[self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
-                                    [220, 220, 220]], [], []]
-            self.btn1_wait_to_click = -1
-            self.object_history = []
-            self.update()
-            print("cleaned")
+            rs = self.Dialog("Вы уверены, что хотите очистить экран?", "Очистка", True).exec()
+            if rs:
+                self.btn1_drawcoards = []
+                self.render_objects = [[self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
+                                        [220, 220, 220]], [], []]
+                self.btn1_wait_to_click = -1
+                self.object_history = []
+                self.update()
+                print("cleaned")
 
         def btn5_click(self):
             rs = self.Dialog("Вы уверены, что хотите заменить сохранение?", "Сохранение", True).exec()
@@ -284,7 +286,6 @@ class ThirdWindow:
                 except:
                     self.Dialog("Не найдено сохранение или оно некоректно", "Сохранение").exec()
 
-
         def delete_selected(self):
             print("mode: DELETE")
 
@@ -303,7 +304,9 @@ class ThirdWindow:
                 val = self.dial.value()
             try:
                 if not self.ignore_rotate:
-                    while self.RectAndWidgetCollision(self.rotate_rect(self.selected[0], val), self.sandbox):
+                    while self.RectAndWidgetCollision(self.rotate_rect(self.selected[0], val),
+                                                      self.sandbox) or self.RectAnfRenderObjCollision(
+                            self.rotate_rect(self.selected[0], val), self.render_objects):
                         val -= 1
                     self.render_objects[2][self.render_objects[2].index(self.selected)][1] = val
                     self.selected[1] = val
@@ -358,6 +361,39 @@ class ThirdWindow:
             dotso1 = min(dotso1), max(dotso1)
             dotso2 = min(dotso2), max(dotso2)
             return dotso1[0] <= coards_o1 <= dotso1[1] and dotso2[0] <= coards_o2 <= dotso2[1]
+
+        def ProjectVertices(self, rect, o):
+            mi = 10 ** 9
+            ma = -10 ** 9
+            for i in rect:
+                proj = self.dot(i, o)
+                mi = min(mi, proj)
+                ma = max(ma, proj)
+            return [mi, ma]
+
+        def RectAndRectCollision(self, rect1, rect2):
+            for i in [3, 1]:
+                o = [rect1[0][0] - rect1[i][0], rect1[0][1] - rect1[i][1]]
+                proj1 = self.ProjectVertices(rect1, o)
+                proj2 = self.ProjectVertices(rect2, o)
+                if proj1[0] >= proj2[1] or proj2[0] >= proj1[1]:
+                    return False
+            for i in [3, 1]:
+                o = [rect2[0][0] - rect2[i][0], rect2[0][1] - rect2[i][1]]
+                proj1 = self.ProjectVertices(rect1, o)
+                proj2 = self.ProjectVertices(rect2, o)
+                if proj1[0] >= proj2[1] or proj2[0] >= proj1[1]:
+                    return False
+            return True
+
+        def RectAnfRenderObjCollision(self, rect, renderobjects):
+            for i in renderobjects[2]:
+                if len(i) >= 2 and i != self.hide and i != self.selected:
+                    i = self.rotate_rect(i[0], i[1])
+                    if self.RectAndRectCollision(rect, i):
+                        print(i)
+                        return True
+            return False
 
         def RectAndWidgetCollision(self, rect, widget):
             t = []
@@ -414,8 +450,27 @@ class ThirdWindow:
                 self.delete_selected()
             if event.key() == Qt2.Key_Z and Qt2.Key_Control in self.keys:
                 self.btn3_click()
+            if event.key() == Qt2.Key_Escape:
+                self.flag_down()
+                self.selected = None
+                self.hide = None
+                self.moving = None
+                self.mouse_tracking = False
+                self.btn2_drawcoards = []
+                self.btn1_drawcoards = []
+                self.btn1_wait_to_click = -1
+                self.btn2_wait_to_click = -1
 
             self.keys.append(event.key())
+            if self.selected is None:
+                self.dial.hide()
+                self.colorslider.hide()
+                self.spinBox.hide()
+            else:
+                self.dial.show()
+                self.colorslider.show()
+                self.spinBox.show()
+            self.update()
 
         def keyReleaseEvent(self, event):
             del self.keys[self.keys.index(event.key())]
@@ -433,18 +488,16 @@ class ThirdWindow:
 
             if self.selected is not None and self.mouse_btn == 2 and self.mouse_tracking:
                 buf = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
-                self.hide = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
                 dx, dy = mouse_coards[0] - self.start_coards[0], mouse_coards[1] - self.start_coards[1]
-                buf[0] = [[buf[0][0][0] + dx, buf[0][0][1] + dy], [buf[0][1][0] + dx, buf[0][1][1] + dy], [buf[0][2][0] + dx, buf[0][2][1] + dy],[buf[0][3][0] + dx, buf[0][3][1] + dy]]
-                if not self.RectAndWidgetCollision(self.rotate_rect(buf[0], buf[1]), self.sandbox):
+                buf[0] = [[buf[0][0][0] + dx, buf[0][0][1] + dy], [buf[0][1][0] + dx, buf[0][1][1] + dy],
+                          [buf[0][2][0] + dx, buf[0][2][1] + dy], [buf[0][3][0] + dx, buf[0][3][1] + dy]]
+                self.hide = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
+                if not self.RectAndWidgetCollision(self.rotate_rect(buf[0], buf[1]),
+                                                   self.sandbox) and not self.RectAnfRenderObjCollision(
+                        self.rotate_rect(buf[0], buf[1]), self.render_objects):
                     self.moving = buf
                 else:
-                    self.start_coards[0] = mouse_coards[0] - dx
-                    self.start_coards[1] = mouse_coards[1] - dy
-
-
-
-
+                    pass
 
             self.mousepos.setText(f"Координаты: {event.x()}, {event.y()}")
             self.update()
@@ -500,8 +553,6 @@ class ThirdWindow:
             elif (event.button() == Qt2.RightButton):
                 self.mousebtn.setText("Правая")
 
-
-
         def mouseReleaseEvent(self, event):
             mouse_coards = [event.x(), event.y()]
             mouse_btn = event.button()
@@ -518,16 +569,22 @@ class ThirdWindow:
                 self.btn1_wait_to_click = 0
 
             if mouse_btn == 1 and len(self.btn2_drawcoards) == 2:
-                self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0])
-                print(
-                    f"drawn RECT ({self.render_objects[2][-1][0][0]}, {self.render_objects[2][-1][0][1]}, {self.render_objects[2][-1][0][2]}, {self.render_objects[2][-1][0][3]})")
-                self.object_history.append([2, [self.get_all_points(self.btn2_drawcoards), 0]])
-                self.btn2_drawcoards = []
-                self.btn2_wait_to_click = 0
+                rect = [self.get_all_points(self.btn2_drawcoards), 0]
+                if not self.RectAnfRenderObjCollision(rect[0], self.render_objects):
+                    self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0])
+                    print(
+                        f"drawn RECT ({self.render_objects[2][-1][0][0]}, {self.render_objects[2][-1][0][1]}, {self.render_objects[2][-1][0][2]}, {self.render_objects[2][-1][0][3]})")
+                    self.object_history.append([2, [self.get_all_points(self.btn2_drawcoards), 0]])
+                    self.btn2_drawcoards = []
+                    self.btn2_wait_to_click = 0
+                else:
+                    self.btn2_drawcoards = []
+                    self.btn2_wait_to_click = 0
 
             if self.moving and self.mouse_tracking:
                 self.mouse_tracking = False
-                self.object_history.append(["moved", self.render_objects[2][self.render_objects[2].index(self.selected)], self.moving])
+                self.object_history.append(
+                    ["moved", self.render_objects[2][self.render_objects[2].index(self.selected)], self.moving])
                 self.render_objects[2][self.render_objects[2].index(self.selected)] = self.moving
                 self.moving = None
                 self.hide = None
