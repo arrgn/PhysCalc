@@ -74,6 +74,7 @@ class ThirdWindow:
             self.mouse_tracking = False
             self.moving = None
             self.hidden = None
+            self.colors = {"red": Qt2.darkRed, "green": Qt2.darkGreen, "blue": Qt2.darkBlue, "cyan": Qt2.darkCyan, "white": Qt2.white, "grey":Qt2.darkGray, "transparent": -1}
 
             self.initUI()
 
@@ -104,9 +105,14 @@ class ThirdWindow:
             self.spinBox.setValue(0)
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
-            self.colorslider.valueChanged.connect(self.colorchange)
+            #self.colorslider.valueChanged.connect(self.colorchange)
+            self.colorbox.activated.connect(self.colorchange2)
+            for i in self.colors:
+                self.colorbox.addItem(i)
+            self.colorbox.setCurrentIndex(5)
             self.dial.hide()
-            self.colorslider.hide()
+            self.colorbox.hide()
+            #self.colorslider.hide()
             self.spinBox.hide()
 
         def renderf(self, qp):
@@ -129,11 +135,19 @@ class ThirdWindow:
                 if i == self.selected and i != self.hide:
                     qp.setPen(QPen(Qt2.black, 5, Qt2.DotLine))
                     qp.setBrush(QBrush(Qt2.lightGray, Qt2.DiagCrossPattern))
+                    if len(i) == 3:
+                        if i[2] == -1:
+                            qp.setBrush(QBrush(Qt2.transparent, Qt2.DiagCrossPattern))
+                        else:
+                            qp.setBrush(QBrush(QColor(i[2]), Qt2.DiagCrossPattern))
                     self.drawRect(i[0], i[1], qp)
                 elif i != self.hide:
                     if len(i) == 3:
-                        qp.setBrush(QBrush(QColor(i[2]), Qt2.SolidPattern))
-                        qp.setPen(QPen(Qt2.black, 3, Qt2.SolidLine))
+                        if i[2] == -1:
+                            qp.setBrush(QBrush(Qt2.transparent, Qt2.SolidPattern))
+                        else:
+                            qp.setBrush(QBrush(QColor(i[2]), Qt2.SolidPattern))
+                    qp.setPen(QPen(Qt2.black, 3, Qt2.SolidLine))
                     self.drawRect(i[0], i[1], qp)
                     self.update()
 
@@ -158,6 +172,11 @@ class ThirdWindow:
             if self.moving is not None:
                 qp.setPen(QPen(Qt2.black, 5, Qt2.DotLine))
                 qp.setBrush(QBrush(Qt2.lightGray, Qt2.DiagCrossPattern))
+                if len(self.moving) == 3:
+                    if self.moving[2] == -1:
+                        qp.setBrush(QBrush(Qt2.transparent, Qt2.DiagCrossPattern))
+                    else:
+                        qp.setBrush(QBrush(QColor(self.moving[2]), Qt2.DiagCrossPattern))
                 self.drawRect(self.moving[0], self.moving[1], qp)
 
         def rotate_rect_coards(self, center, w, h, angle):
@@ -209,6 +228,10 @@ class ThirdWindow:
             self.btn5_wait_to_click = -1
             self.btn7_wait_to_click = -1
             self.selected = None
+            self.dial.hide()
+            self.colorbox.hide()
+            self.spinBox.hide()
+
 
         def btn1_click(self):
             print("mode: LINE")
@@ -263,6 +286,13 @@ class ThirdWindow:
                 self.render_objects[2][self.render_objects[2].index(self.selected)].append(colors[mapped_value])
             elif len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 3:
                 self.render_objects[2][self.render_objects[2].index(self.selected)][2] = colors[mapped_value]
+
+        def colorchange2(self):
+            color = self.colors[self.colorbox.currentText()]
+            if len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 2:
+                self.render_objects[2][self.render_objects[2].index(self.selected)].append(color)
+            elif len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 3:
+                self.render_objects[2][self.render_objects[2].index(self.selected)][2] = color
 
         def btn4_click(self):
             rs = self.Dialog("Вы уверены, что хотите очистить экран?", "Очистка", True).exec()
@@ -488,6 +518,9 @@ class ThirdWindow:
                 a1[1] += rect[3]
             return [a1[0], a1[1], abs(rect[2]), abs(rect[3])]
 
+        def area(self, rect):
+            return abs(rect[0][0] - rect[1][0]) * abs(rect[0][1] - rect[3][1])
+
         def keyPressEvent(self, event):
             if event.key() in [Qt2.Key_Delete, Qt2.Key_Backspace]:
                 self.delete_selected()
@@ -503,15 +536,17 @@ class ThirdWindow:
                 self.btn1_drawcoards = []
                 self.btn1_wait_to_click = -1
                 self.btn2_wait_to_click = -1
+                self.btn7_wait_to_click = -1
+                self.btn7_drawcoards = []
 
             self.keys.append(event.key())
             if self.selected is None:
                 self.dial.hide()
-                self.colorslider.hide()
+                self.colorbox.hide()
                 self.spinBox.hide()
             else:
                 self.dial.show()
-                self.colorslider.show()
+                self.colorbox.show()
                 self.spinBox.show()
             self.update()
 
@@ -581,33 +616,41 @@ class ThirdWindow:
                     self.btn7_drawcoards = [mouse_coards, mouse_coards]
                     self.btn7_wait_to_click = 1
                     print(f"starting drawing DELETERECT from ({mouse_coards[0]}, {mouse_coards[1]})")
+
             if self.mouse_btn == 2 and mouse_in_sandbox and [self.btn1_drawcoards, self.btn2_drawcoards, self.btn7_drawcoards] == [[], [], []]:
-                self.flag_down()
+
                 buf = self.select_rect(self.render_objects[2], mouse_coards)
+
                 if buf == self.selected:
                     self.mouse_tracking = True
                     self.start_coards = mouse_coards
                 else:
                     self.mouse_tracking = False
+
                 self.selected = self.select_rect(self.render_objects[2], mouse_coards)
+
+                if self.selected is not None and len(self.selected) == 3:
+                    self.colorbox.setCurrentIndex(list(self.colors.values()).index(self.selected[2]))
+                else:
+                    self.colorbox.setCurrentIndex(list(self.colors.values()).index(Qt2.darkGray))
+
                 if self.selected is not None:
                     self.update()
                     self.dial.show()
-                    self.colorslider.show()
+                    self.colorbox.show()
                     self.spinBox.show()
                     self.dial.setValue(self.selected[1])
                     self.update()
                     print(f"selected RECT {self.selected} with number {self.render_objects[2].index(self.selected)}")
                 else:
                     print("nothing selected")
-
             if self.selected is None:
                 self.dial.hide()
-                self.colorslider.hide()
+                self.colorbox.hide()
                 self.spinBox.hide()
             else:
                 self.dial.show()
-                self.colorslider.show()
+                self.colorbox.show()
                 self.spinBox.show()
 
             self.update()
@@ -643,16 +686,15 @@ class ThirdWindow:
 
             if mouse_btn == 1 and len(self.btn2_drawcoards) == 2:
                 rect = [self.get_all_points(self.btn2_drawcoards), 0]
-                if not self.RectAnfRenderObjCollision(rect[0], self.render_objects):
-                    self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0])
-                    print(
-                        f"drawn RECT ({self.render_objects[2][-1][0][0]}, {self.render_objects[2][-1][0][1]}, {self.render_objects[2][-1][0][2]}, {self.render_objects[2][-1][0][3]})")
-                    self.object_history.append([2, [self.get_all_points(self.btn2_drawcoards), 0]])
-                    self.btn2_drawcoards = []
-                    self.btn2_wait_to_click = 0
-                else:
-                    self.btn2_drawcoards = []
-                    self.btn2_wait_to_click = 0
+                if self.area(rect[0]) > 100:
+                    if not self.RectAnfRenderObjCollision(rect[0], self.render_objects):
+
+                        self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0, Qt2.darkGray])
+                        print(
+                            f"drawn RECT ({self.render_objects[2][-1][0][0]}, {self.render_objects[2][-1][0][1]}, {self.render_objects[2][-1][0][2]}, {self.render_objects[2][-1][0][3]})")
+                        self.object_history.append([2, [self.get_all_points(self.btn2_drawcoards), 0]])
+                self.btn2_drawcoards = []
+                self.btn2_wait_to_click = 0
 
             if mouse_btn == 1 and len(self.btn7_drawcoards) == 2:
                 rect = [self.get_all_points(self.btn7_drawcoards), 0]
@@ -686,11 +728,11 @@ class ThirdWindow:
 
             if self.selected is None:
                 self.dial.hide()
-                self.colorslider.hide()
+                self.colorbox.hide()
                 self.spinBox.hide()
             else:
                 self.dial.show()
-                self.colorslider.show()
+                self.colorbox.show()
                 self.spinBox.show()
 
 
