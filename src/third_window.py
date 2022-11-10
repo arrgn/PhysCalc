@@ -105,15 +105,14 @@ class ThirdWindow:
             self.spinBox.setValue(0)
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
-            #self.colorslider.valueChanged.connect(self.colorchange)
             self.colorbox.activated.connect(self.colorchange2)
             for i in self.colors:
                 self.colorbox.addItem(i)
             self.colorbox.setCurrentIndex(5)
             self.dial.hide()
             self.colorbox.hide()
-            #self.colorslider.hide()
             self.spinBox.hide()
+            self.btn3.hide()
 
         def renderf(self, qp):
 
@@ -522,7 +521,7 @@ class ThirdWindow:
             return abs(rect[0][0] - rect[1][0]) * abs(rect[0][1] - rect[3][1])
 
         def line_len(self, line):
-            return ((line[0] - line[2]) ** 2 + (line[1] - line[2]) ** 2) ** 0.5
+            return ((line[0] - line[2]) ** 2 + (line[1] - line[3]) ** 2) ** 0.5
 
         def keyPressEvent(self, event):
             if event.key() in [Qt2.Key_Delete, Qt2.Key_Backspace]:
@@ -672,6 +671,7 @@ class ThirdWindow:
             if mouse_btn == 1 and len(self.btn1_drawcoards) == 2:
                 flag = True
                 line = self.transform_coards_for_line(self.btn1_drawcoards)
+                print(self.line_len(line))
                 if self.line_len(line) > 100:
                     line = [[line[0], line[1]], [line[2], line[3]]]
                     for i in self.render_objects[2]:
@@ -685,10 +685,9 @@ class ThirdWindow:
                 self.btn1_drawcoards = []
                 self.btn1_wait_to_click = 0
 
-
             if mouse_btn == 1 and len(self.btn2_drawcoards) == 2:
                 rect = [self.get_all_points(self.btn2_drawcoards), 0]
-                if self.area(rect[0]) > 100:
+                if self.area(rect[0]) > 500:
                     if not self.RectAnfRenderObjCollision(rect[0], self.render_objects):
 
                         self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0, Qt2.darkGray])
