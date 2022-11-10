@@ -18,8 +18,6 @@ def copy_file(src, username):
         shutil.copy(src, path_to_userdata(basename(src), username))
     except shutil.SameFileError:
         logger.exception("Tracked exception occurred!")
-    except Exception:
-        logger.exception("Abnormal exception occurred!")
 
 
 def create_user_dir(username):
@@ -27,8 +25,6 @@ def create_user_dir(username):
         makedirs(path_to_userdata("", username))
     except FileExistsError:
         logger.exception("Tracked exception occurred!")
-    except Exception:
-        logger.exception("Abnormal exception occurred!")
 
 
 def create_dir(dirname):
@@ -36,5 +32,3 @@ def create_dir(dirname):
         makedirs(path_to_file(dirname))
     except FileExistsError:
         logger.exception("Tracked exception occurred!")
-    except Exception:
-        logger.exception("Abnormal exception occurred!")

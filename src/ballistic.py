@@ -39,9 +39,7 @@ class BallisticWindow:
         except ValueError:
             logger.exception("Tracked exception occurred!")
             return
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
-            return
+
 
         x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
         y = self.f(x, angle, velocity, g)

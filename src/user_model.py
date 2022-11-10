@@ -21,8 +21,6 @@ class User:
             return True
         except DAO.UserExistsError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def set_user(self, name, password):
@@ -33,8 +31,6 @@ class User:
             return res
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def get_user(self):
@@ -51,8 +47,6 @@ class User:
             return res[0][2]
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def change_username(self, new_name):
@@ -64,8 +58,6 @@ class User:
             logger.exception("Tracked exception occurred!")
         except DAO.UserExistsError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def change_avatar(self, avatar="default.png"):
@@ -74,8 +66,6 @@ class User:
             return True
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def delete_user(self):
@@ -84,8 +74,6 @@ class User:
             return res
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def get_workspaces(self):
@@ -94,8 +82,6 @@ class User:
             return res
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def get_workspace(self, ws_name):
@@ -104,8 +90,6 @@ class User:
             return res
         except (DAO.UserDoesntExistError, DAO.WorkspaceNotFoundError):
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def add_workspace(self, ws_name, file, description=""):
@@ -114,8 +98,6 @@ class User:
             return True
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
 
     def delete_workspace(self, ws_name):
@@ -124,6 +106,4 @@ class User:
             return res
         except (DAO.UserDoesntExistError, DAO.WorkspaceNotFoundError):
             logger.exception("Tracked exception occurred!")
-        except Exception:
-            logger.exception("Abnormal exception occurred!")
         return False
