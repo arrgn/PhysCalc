@@ -581,8 +581,8 @@ class ThirdWindow:
                     self.btn7_drawcoards = [mouse_coards, mouse_coards]
                     self.btn7_wait_to_click = 1
                     print(f"starting drawing DELETERECT from ({mouse_coards[0]}, {mouse_coards[1]})")
-
-            if self.mouse_btn == 2 and mouse_in_sandbox:
+            if self.mouse_btn == 2 and mouse_in_sandbox and [self.btn1_drawcoards, self.btn2_drawcoards, self.btn7_drawcoards] == [[], [], []]:
+                self.flag_down()
                 buf = self.select_rect(self.render_objects[2], mouse_coards)
                 if buf == self.selected:
                     self.mouse_tracking = True
