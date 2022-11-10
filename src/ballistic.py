@@ -16,7 +16,7 @@ class BallisticWindow:
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("ballistics.ui"), self.ui)
+        uic.loadUi(path_to_file("uis", "ballistics.ui"), self.ui)
 
         self.ui.AngleInput.setText("30")
         self.ui.VelocityInput.setText("10")
@@ -39,7 +39,6 @@ class BallisticWindow:
         except ValueError:
             logger.exception("Tracked exception occurred!")
             return
-
 
         x = np.linspace(0, velocity ** 2 * np.sin(2 * angle) / g, 1000)
         y = self.f(x, angle, velocity, g)

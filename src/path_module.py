@@ -5,8 +5,8 @@ from os.path import basename
 from loggers import logger
 
 
-def path_to_file(*filename) -> str:
-    return path.join(Path(__file__).parent.resolve(), *filename)
+def path_to_file(*elements) -> str:
+    return path.join(Path(__file__).parent.resolve(), *elements)
 
 
 def path_to_userdata(filename: str, username: str) -> str:

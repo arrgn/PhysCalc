@@ -21,7 +21,7 @@ class ProfileWindow(QDialog):
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("profile.ui"), self)
+        uic.loadUi(path_to_file("uis", "profile.ui"), self)
 
         self.username.setText(user.get_user())
 

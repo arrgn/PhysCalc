@@ -17,7 +17,7 @@ class AuthWindow(QDialog):
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("auth_window.ui"), self)
+        uic.loadUi(path_to_file("uis", "auth_window.ui"), self)
         if self.is_login:
             self.auth_btn.setText("Sign In")
             self.auth_btn.clicked.connect(self.login)

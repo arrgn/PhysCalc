@@ -1,5 +1,5 @@
 from PyQt5 import Qt
-from PyQt5.QtCore import QPropertyAnimation, QFile
+from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
@@ -35,8 +35,8 @@ class Window(QWidget):
         self.drop_btn = QPushButton(self)
         self.auth_btn = QPushButton(self)
 
-        self.drop_menu = SideMenu(self, self.drop_btn, "drop_menu.ui", 121, 200, True)
-        self.auth_menu = SideMenu(self, self.auth_btn, "auth_menu.ui", 121, 200, False)
+        self.drop_menu = SideMenu(self, self.drop_btn, path_to_file("uis", "drop_menu.ui"), 121, 200, True)
+        self.auth_menu = SideMenu(self, self.auth_btn, path_to_file("uis", "auth_menu.ui"), 121, 200, False)
         self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
         self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
         self.auth_menu.menu.sign_in.clicked.connect(lambda: AuthWindow(True).exec())
