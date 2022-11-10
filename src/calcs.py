@@ -1,10 +1,10 @@
 import numpy as np
+from numpy import inf
 from PyQt5 import Qt, uic
 from PyQt5.QtWidgets import QWidget
 import pyqtgraph as pg
 from choose_plot_type import ChoosePlotWindow
 from config import path_to_file
-import sympy as sym
 from sympy import *
 
 
@@ -41,7 +41,7 @@ class CalcsWindow:
 
         self.functions.clear()
 
-        res = ChoosePlotWindow(self.functions, self.start)
+        res = ChoosePlotWindow(self.functions, self.start).exec()
 
         self.s_o, self.v_o = self.start
 
@@ -50,6 +50,8 @@ class CalcsWindow:
 
         y_s = self.s_o
         y_v = self.v_o
+
+        # ((x + 2)^3) / 5 - sqrt((x^2 - 2 * x^5) / x)
 
         if res == 0:
             return
@@ -60,6 +62,8 @@ class CalcsWindow:
                                 1000)
 
                 segment[2] = segment[2].replace("^", "**")
+                segment[0] = segment[0].replace("pi", str(np.pi))
+                segment[1] = eval(segment[1].replace("pi", str(np.pi)))
 
                 # Coordinate
 
@@ -70,12 +74,14 @@ class CalcsWindow:
 
                 self.ui.Plot_s.plot(x=X, y=y_s)
 
-                x = sym.Symbol('x')
+                x = Symbol('x')
 
                 # Velocity
 
                 expr = eval(segment[2])
-                velocity = self.sympy_to_numpy(str(sym.diff(expr)))
+                velocity = self.sympy_to_numpy(str(diff(expr)))
+
+                print(velocity)
 
                 y_v = eval(velocity)
 
@@ -87,7 +93,7 @@ class CalcsWindow:
                 # Acceleration
 
                 expr = eval(segment[2])
-                acceleration = self.sympy_to_numpy(str(sym.diff(expr, x, x)))
+                acceleration = self.sympy_to_numpy(str(diff(expr, x, x)))
 
                 y_a = eval(acceleration)
 
@@ -106,6 +112,8 @@ class CalcsWindow:
                                 1000)
 
                 segment[2] = segment[2].replace("^", "**")
+                segment[0] = segment[0].replace("pi", str(np.pi))
+                segment[1] = eval(segment[1].replace("pi", str(np.pi)))
 
                 # Velocity
 
@@ -116,13 +124,13 @@ class CalcsWindow:
 
                 self.ui.Plot_v.plot(x=X, y=y_v)
 
-                # Coordinate
+                x = Symbol('x')
 
-                x = sym.Symbol('x')
+                # Coordinate
 
                 expr = eval(segment[2])
 
-                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)) + f" + {self.v_o}")
+                coordinate = self.sympy_to_numpy(str(integrate(expr, x)) + f" + {self.v_o}")
 
                 y_s = eval(coordinate + " + " + str((self.s_o - eval(f"{coordinate}".replace("X", segment[0])))))
 
@@ -134,9 +142,11 @@ class CalcsWindow:
                 # Acceleration
 
                 expr = eval(segment[2])
-                acceleration = self.sympy_to_numpy(str(sym.diff(expr)))
+                acceleration = self.sympy_to_numpy(str(diff(expr)))
 
-                y_a = eval(acceleration.replace("X", f"(X - {segment[0].replace('pi', str(np.pi))})"))
+                print(acceleration)
+
+                y_a = eval(acceleration)
 
                 if type(y_a) == int or type(y_a) == float:
                     y_a = np.linspace(y_a, y_a, 1000)
@@ -153,6 +163,8 @@ class CalcsWindow:
                                 1000)
 
                 segment[2] = segment[2].replace("^", "**")
+                segment[0] = segment[0].replace("pi", str(np.pi))
+                segment[1] = eval(segment[1].replace("pi", str(np.pi)))
 
                 # Acceleration
 
@@ -165,16 +177,15 @@ class CalcsWindow:
 
                 # Velocity
 
-                x = sym.Symbol('x')
+                x = Symbol('x')
 
                 expr = eval(segment[2])
 
-                velocity = self.sympy_to_numpy(str(sym.integrate(expr, x)))
+                velocity = self.sympy_to_numpy(str(integrate(expr, x)))
 
-                func = velocity + " + " + str(
-                    (self.v_o - eval(f"{velocity}".replace("X", str(eval(segment[0].replace("pi", str(np.pi))))))))
+                func = velocity + " + " + str((self.v_o - eval(f"{velocity}".replace("X", segment[0]))))
 
-                y_v = eval(func)
+                y_v = eval(self.numpy_to_sympy(func))
 
                 if type(y_v) == int or type(y_v) == float:
                     y_v = np.linspace(y_v, y_v, 1000)
@@ -183,9 +194,9 @@ class CalcsWindow:
 
                 # Coordinate
 
-                expr = eval(func.replace("X", "x"))
+                expr = eval(self.numpy_to_sympy(func).replace("X", "x"))
 
-                coordinate = self.sympy_to_numpy(str(sym.integrate(expr, x)) + f" + {self.v_o}")
+                coordinate = self.sympy_to_numpy(str(integrate(expr, x)) + f" + {self.v_o}")
 
                 y_s = eval(coordinate + " + " + str(
                     (self.s_o - eval(f"{coordinate}".replace("X", str(eval(segment[0].replace("pi", str(np.pi)))))))))
@@ -198,20 +209,31 @@ class CalcsWindow:
                 self.s_o = y_s[-1]
 
     def sympy_to_numpy(self, expr: str):
-        return expr\
-            .replace("asin", "np.ASIN") \
-            .replace("acos", "np.ACOS") \
-            .replace("atan", "np.ATAN") \
-            .replace("acos", "arcctg") \
+        return expr \
+            .replace("asin", "ASIN") \
+            .replace("acos", "ACOS") \
+            .replace("atan", "ATAN") \
+            .replace("acot", "arcctg") \
             .replace("sin", "np.sin") \
             .replace("cos", "np.cos") \
             .replace("tan", "np.tan") \
             .replace("cot", "ctg") \
-            .replace("log", "np.log") \
-            .replace("ASIN", "arcsin") \
-            .replace("ACOT", "arccot") \
-            .replace("ATAN", "arctan") \
+            .replace("ASIN", "np.arcsin") \
+            .replace("ACOS", "np.arccos") \
+            .replace("ATAN", "np.arctan") \
             .replace("sqrt", "np.sqrt") \
+            .replace("x", "X")
+
+    def numpy_to_sympy(self, expr: str):
+        return expr \
+            .replace("np.arcsin", "asin") \
+            .replace("np.arccos", "acos") \
+            .replace("np.arctan", "atan") \
+            .replace("ctg", "cot") \
+            .replace("np.sin", "sin") \
+            .replace("np.cos", "cos") \
+            .replace("np.tan", "tan") \
+            .replace("np.sqrt", "sqrt") \
             .replace("x", "X")
 
     def show(self):
