@@ -105,6 +105,9 @@ class ThirdWindow:
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
             self.colorslider.valueChanged.connect(self.colorchange)
+            self.dial.hide()
+            self.colorslider.hide()
+            self.spinBox.hide()
 
         def renderf(self, qp):
 
