@@ -51,8 +51,6 @@ class CalcsWindow:
         y_s = self.s_o
         y_v = self.v_o
 
-        # ((x + 2)^3) / 5 - sqrt((x^2 - 2 * x^5) / x)
-
         if res == 0:
             return
         elif res == 3:
@@ -185,7 +183,7 @@ class CalcsWindow:
 
                 func = velocity + " + " + str((self.v_o - eval(f"{velocity}".replace("X", segment[0]))))
 
-                y_v = eval(self.numpy_to_sympy(func))
+                y_v = eval(func)
 
                 if type(y_v) == int or type(y_v) == float:
                     y_v = np.linspace(y_v, y_v, 1000)
