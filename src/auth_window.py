@@ -23,6 +23,9 @@ class AuthWindow(QDialog):
             self.auth_btn.clicked.connect(self.login)
         else:
             self.auth_btn.clicked.connect(self.register)
+        ssh_file = path_to_file("themes", "SpyBot.qss")
+        with open(ssh_file, "r") as fh:
+            self.setStyleSheet(fh.read())
         self.show()
 
     def register(self):

@@ -14,13 +14,13 @@
    <string>Frame</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background: rgba(0,25,255,0.5);</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QPushButton" name="closer">
      <property name="styleSheet">
-      <string notr="true">background: red;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Close</string>
@@ -30,7 +30,7 @@
    <item>
     <widget class="QPushButton" name="profile">
      <property name="styleSheet">
-      <string notr="true">background: red;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Profile</string>
@@ -40,7 +40,7 @@
    <item>
     <widget class="QPushButton" name="sign_in">
      <property name="styleSheet">
-      <string notr="true">background: red;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Sign in</string>
@@ -50,7 +50,7 @@
    <item>
     <widget class="QPushButton" name="sign_up">
      <property name="styleSheet">
-      <string notr="true">background: red;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Sign up</string>

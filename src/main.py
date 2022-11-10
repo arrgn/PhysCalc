@@ -1,5 +1,5 @@
 from PyQt5 import Qt
-from PyQt5.QtCore import QPropertyAnimation
+from PyQt5.QtCore import QPropertyAnimation, QFile
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
@@ -45,21 +45,26 @@ class Window(QWidget):
 
         self.drop_btn.setCheckable(True)
         self.drop_btn.setGeometry(Qt.QRect(5, 5, 25, 25))
-        self.drop_btn.setStyleSheet("background: blue")
         self.drop_btn.clicked.connect(self.drop_menu.show_hide_menu)
 
         self.auth_btn.setCheckable(True)
         self.auth_btn.setGeometry(Qt.QRect(self.width() - 30, 5, 25, 25))
-        self.auth_btn.setStyleSheet("background: blue")
         self.auth_btn.clicked.connect(self.auth_menu.show_hide_menu)
 
         self.drop_menu.show_hide_menu()
         self.auth_menu.show_hide_menu()
+        self.setWindowTitle("Ballistics")
+
+        ssh_file = path_to_file("themes", "SpyBot.qss")
+        with open(ssh_file, "r") as fh:
+            self.setStyleSheet(fh.read())
 
     def switch_window(self):
         if self.ui.sender().objectName() == self.drop_menu.menu.w1_btn.objectName():
+            self.setWindowTitle("Ballistics")
             self.ui.setCurrentIndex(0)
         elif self.ui.sender().objectName() == self.drop_menu.menu.w2_btn.objectName():
+            self.setWindowTitle("Calcs")
             self.ui.setCurrentIndex(1)
         self.drop_btn.setChecked(False)
         self.auth_btn.setChecked(False)

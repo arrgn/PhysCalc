@@ -31,6 +31,9 @@ class ProfileWindow(QDialog):
 
         self.load_avatar()
 
+        ssh_file = path_to_file("themes", "SpyBot.qss")
+        with open(ssh_file, "r") as fh:
+            self.setStyleSheet(fh.read())
         self.show()
 
     def change_username(self):
