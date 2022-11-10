@@ -521,6 +521,9 @@ class ThirdWindow:
         def area(self, rect):
             return abs(rect[0][0] - rect[1][0]) * abs(rect[0][1] - rect[3][1])
 
+        def line_len(self, line):
+            return ((line[0] - line[2]) ** 2 + (line[1] - line[2]) ** 2) ** 0.5
+
         def keyPressEvent(self, event):
             if event.key() in [Qt2.Key_Delete, Qt2.Key_Backspace]:
                 self.delete_selected()
@@ -669,20 +672,19 @@ class ThirdWindow:
             if mouse_btn == 1 and len(self.btn1_drawcoards) == 2:
                 flag = True
                 line = self.transform_coards_for_line(self.btn1_drawcoards)
-                line = [[line[0], line[1]], [line[2], line[3]]]
-                for i in self.render_objects[2]:
-                    if self.RectAndLineCollision(self.rotate_rect(i[0], i[1]), line):
-                        flag = False
-                if flag:
-                    self.render_objects[1].append(self.transform_coards_for_line(self.btn1_drawcoards))
-                    print(
-                        f"drawn LINE from ({self.render_objects[1][-1][0]}, {self.render_objects[1][-1][1]}) to ({self.render_objects[1][-1][2]}, {self.render_objects[1][-1][3]})")
-                    self.object_history.append([1, self.transform_coards_for_line(self.btn1_drawcoards)])
-                    self.btn1_drawcoards = []
-                    self.btn1_wait_to_click = 0
-                else:
-                    self.btn1_drawcoards = []
-                    self.btn1_wait_to_click = 0
+                if self.line_len(line) > 100:
+                    line = [[line[0], line[1]], [line[2], line[3]]]
+                    for i in self.render_objects[2]:
+                        if self.RectAndLineCollision(self.rotate_rect(i[0], i[1]), line):
+                            flag = False
+                    if flag:
+                        self.render_objects[1].append(self.transform_coards_for_line(self.btn1_drawcoards))
+                        print(
+                            f"drawn LINE from ({self.render_objects[1][-1][0]}, {self.render_objects[1][-1][1]}) to ({self.render_objects[1][-1][2]}, {self.render_objects[1][-1][3]})")
+                        self.object_history.append([1, self.transform_coards_for_line(self.btn1_drawcoards)])
+                self.btn1_drawcoards = []
+                self.btn1_wait_to_click = 0
+
 
             if mouse_btn == 1 and len(self.btn2_drawcoards) == 2:
                 rect = [self.get_all_points(self.btn2_drawcoards), 0]
