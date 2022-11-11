@@ -6,7 +6,7 @@ from loggers import logger
 class User:
     def __init__(self, database=None):
         self.name = "guest"
-        self.id = 0
+        self.id = 1
         self.dao = None
         if database is not None:
             self.dao = database

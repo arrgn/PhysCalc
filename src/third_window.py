@@ -7,9 +7,10 @@ from PyQt5 import QtCore
 from PyQt5 import uic
 from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
-from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QLineEdit
 from PyQt5.QtWidgets import QWidget
-from path_module import path_to_file
+from path_module import path_to_file, path_to_userdata
+from config import user
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -40,12 +41,15 @@ class ThirdWindow:
             return number of pressed button
             '''
 
-            def __init__(self, text, title, show_button_ok=False):
+            def __init__(self, text, title, shared=None, show_button_ok=False):
 
                 super().__init__()
                 self.text = text
                 self.show_button_ok = show_button_ok
                 self.title = title
+                self.shared = shared
+                self.ask_for_file = QLabel()
+                self.filename = QLineEdit()
                 self.initUI()
 
             def initUI(self):
@@ -62,6 +66,18 @@ class ThirdWindow:
                 message = QLabel(self.text)
                 self.layout.addWidget(message)
                 self.layout.addWidget(self.buttonBox)
+
+                if self.shared is not None:
+                    self.ask_for_file = QLabel(self)
+                    self.ask_for_file.setText("Enter workspace name: ")
+
+                    self.filename = QLineEdit(self)
+                    self.filename.setText(self.shared[0])
+                    self.filename.textChanged.connect(self.get_filename)
+
+                    self.layout.addWidget(self.ask_for_file)
+                    self.layout.addWidget(self.filename)
+
                 self.setLayout(self.layout)
                 self.setWindowTitle(self.title)
 
@@ -69,6 +85,10 @@ class ThirdWindow:
                 ssh_file = path_to_file("themes", "SpyBot.qss")
                 with open(ssh_file, "r") as fh:
                     self.setStyleSheet(fh.read())
+
+            def get_filename(self):
+                self.shared.pop()
+                self.shared.append(self.filename.text())
 
         def __init__(self):
             super().__init__()
@@ -332,7 +352,7 @@ class ThirdWindow:
                 self.render_objects[2][self.render_objects[2].index(self.selected)][2] = color
 
         def btn4_click(self):
-            rs = self.Dialog("Вы уверены, что хотите очистить экран?", "Очистка", True).exec()
+            rs = self.Dialog("Вы уверены, что хотите очистить экран?", "Очистка", show_button_ok=True).exec()
             if rs:
                 self.btn1_drawcoards = []
                 self.render_objects = [[self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
@@ -343,7 +363,8 @@ class ThirdWindow:
                 # print("cleaned")
 
         def btn5_click(self):
-            rs = self.Dialog("Вы уверены, что хотите заменить сохранение?", "Сохранение", True).exec()
+            shared = ["data.json"]
+            rs = self.Dialog("Вы уверены, что хотите заменить сохранение?", "Сохранение", shared, True).exec()
             buf = deepcopy(self.render_objects)
             if rs:
                 for i in range(len(buf[2])):
@@ -356,17 +377,19 @@ class ThirdWindow:
                     "render_objects": buf,
                     "object_history": self.object_history
                 }
-                with open("data.json", "w") as file:
+                print(user.get_user(), user.get_user_id())
+                with open(path_to_userdata(shared[0], str(user.get_user_id())), "w") as file:
                     json.dump(data, file)
 
                 # print("SAVED")
 
         def btn6_click(self):
-            rs = self.Dialog("Вы уверены, что хотите загрузить сохранение?", "Сохранение", True).exec()
+            shared = ["data.json"]
+            rs = self.Dialog("Вы уверены, что хотите загрузить сохранение?", "Сохранение", shared, True).exec()
             if rs:
                 try:
                     self.flag_down()
-                    with open("data.json", "r") as file:
+                    with open(path_to_userdata(shared[0], str(user.get_user_id())), "r") as file:
                         data = json.load(file)
                         buf = data["render_objects"]
                         for i in range(len(buf[2])):
