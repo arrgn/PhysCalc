@@ -134,3 +134,8 @@ dmypy.json
 .fleet/
 .vs/
 .idea/
+
+# Ignore local information
+src/db.db
+src/userdata/
+src/logs/PhysCalc.log
