@@ -16,24 +16,22 @@ Please include a summary of the change or which issue is fixed.
 ## General checklist:
 
 - [ ] My code follows the style guidelines of this project
-- [ ] I ran `npm run format`/`yarn format` before commit
+- [ ] I ran `autopep8 --max-line-length 121` before commit
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation where needed
 - [ ] My changes generate no new warnings
 - [ ] I have checked my code and corrected any misspellings
-- [ ] I have updated `master` and merged to my branch before submitting pull request
-- [ ] My pull request generate no conflicts with `master` branch
+- [ ] I have updated `main` and merged to my branch before submitting pull request
+- [ ] My pull request generate no conflicts with `main` branch
 - [ ] I requested code review from other team members
 
 ## Frontend checklist:
 
-- [ ] I followed guidelines for `HTML`/`LIQUID`, `SCSS`, `JAVASCRIPT` from readme
-- [ ] My `Javascript` generate no new console errors  
-- [ ] I tested my code cross browsers
-- [ ] My slice is pixel perfect for both desktop and mobile according to design
+- [ ] I tested my code with window size changing
+- [ ] My slice is pixel perfect for windows according to design
 - [ ] I conducted basic QA to assure all features are working
-- [ ] I tested responsive for mobile and tablet resolutions
+- [ ] I tested responsive for little window size
 
 ## Backend checklist:
 
@@ -41,5 +39,5 @@ Please include a summary of the change or which issue is fixed.
 - [ ] I followed guidelines for naming admin fields
 - [ ] I created easy to use admin experience which is self-explanatory
 - [ ] I added description to admin fields in hard-to-understand areas
-- [ ] I followed guidelines for naming `php`/`liquid` variables
+- [ ] I followed guidelines for naming variables
 - [ ] I conducted basic QA to assure all features are working
