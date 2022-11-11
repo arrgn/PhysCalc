@@ -3,13 +3,13 @@ import random
 import sys
 from copy import deepcopy
 from math import radians, cos, sin
-
 from PyQt5 import QtCore
 from PyQt5 import uic
 from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
 from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel
 from PyQt5.QtWidgets import QWidget
+from path_module import path_to_file
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -27,11 +27,13 @@ class ThirdWindow:
     '''
     Classs of Third Window
     '''
+
     class DrawWindow(QWidget):
         '''
         Create QDialog with title, text and ok/cancel buttons
         return number of pressed button
         '''
+
         class Dialog(QDialog):
             '''
             Create QDialog with title, text and ok/cancel buttons
@@ -62,6 +64,11 @@ class ThirdWindow:
                 self.layout.addWidget(self.buttonBox)
                 self.setLayout(self.layout)
                 self.setWindowTitle(self.title)
+
+                # Load stylesheet from DevSec Studio (protected by MIT LICENSE)
+                ssh_file = path_to_file("themes", "SpyBot.qss")
+                with open(ssh_file, "r") as fh:
+                    self.setStyleSheet(fh.read())
 
         def __init__(self):
             super().__init__()
@@ -95,7 +102,7 @@ class ThirdWindow:
             self.initUI()
 
         def initUI(self):
-            uic.loadUi("third_window.ui", self)
+            uic.loadUi(path_to_file("uis", "third_window.ui"), self)
             self.mousepos.setText("Координаты: None, None")
             self.mousebtn.setText("")
             self.btn1.setText("Линия")

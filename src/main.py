@@ -3,6 +3,7 @@ from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
+from third_window import ThirdWindow
 from side_menu import SideMenu
 from auth_window import AuthWindow
 from profile_window import ProfileWindow
@@ -34,6 +35,7 @@ class Window(QWidget):
         self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
+        self.ui.addWidget(ThirdWindow().ui)
 
         self.drop_btn = QPushButton(self)
         self.auth_btn = QPushButton(self)
@@ -43,6 +45,7 @@ class Window(QWidget):
         self.auth_menu = SideMenu(self, self.auth_btn, path_to_file("uis", "auth_menu.ui"), 121, 200, False)
         self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
         self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
+        self.drop_menu.menu.w3_btn.clicked.connect(self.switch_window)
         self.auth_menu.menu.sign_in.clicked.connect(lambda: AuthWindow(True).exec())
         self.auth_menu.menu.sign_up.clicked.connect(lambda: AuthWindow(False).exec())
         self.auth_menu.menu.profile.clicked.connect(lambda: ProfileWindow().exec())
@@ -78,6 +81,9 @@ class Window(QWidget):
         elif self.ui.sender().objectName() == self.drop_menu.menu.w2_btn.objectName():
             self.setWindowTitle("Calcs")
             self.ui.setCurrentIndex(1)
+        elif self.ui.sender().objectName() == self.drop_menu.menu.w3_btn.objectName():
+            self.setWindowTitle("Drawing")
+            self.ui.setCurrentIndex(2)
         # Uncheck buttons and hide menus
         self.drop_btn.setChecked(False)
         self.auth_btn.setChecked(False)
