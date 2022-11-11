@@ -18,12 +18,15 @@ class Window(QWidget):
         self.layout_ = QGridLayout()
         self.drop_menu = None
         self.auth_menu = None
+        # Initialize some widgets for convenience
         self.drop_btn = QPushButton()
         self.auth_btn = QPushButton()
         self.animation = QPropertyAnimation()
+
         self.init_ui()
 
     def init_ui(self):
+        # Initialize ui
         self.setLayout(self.layout_)
         self.layout_.addWidget(self.ui)
 
@@ -35,6 +38,7 @@ class Window(QWidget):
         self.drop_btn = QPushButton(self)
         self.auth_btn = QPushButton(self)
 
+        # Add and configure drop menus
         self.drop_menu = SideMenu(self, self.drop_btn, path_to_file("uis", "drop_menu.ui"), 121, 200, True)
         self.auth_menu = SideMenu(self, self.auth_btn, path_to_file("uis", "auth_menu.ui"), 121, 200, False)
         self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
@@ -43,6 +47,7 @@ class Window(QWidget):
         self.auth_menu.menu.sign_up.clicked.connect(lambda: AuthWindow(False).exec())
         self.auth_menu.menu.profile.clicked.connect(lambda: ProfileWindow().exec())
 
+        # Connect buttons to drop menus (show/hide)
         self.drop_btn.setCheckable(True)
         self.drop_btn.setGeometry(Qt.QRect(5, 5, 25, 25))
         self.drop_btn.clicked.connect(self.drop_menu.show_hide_menu)
@@ -53,19 +58,27 @@ class Window(QWidget):
 
         self.drop_menu.show_hide_menu()
         self.auth_menu.show_hide_menu()
+
         self.setWindowTitle("Ballistics")
 
+        # Load stylesheet from DevSec Studio (protected by MIT LICENSE)
         ssh_file = path_to_file("themes", "SpyBot.qss")
         with open(ssh_file, "r") as fh:
             self.setStyleSheet(fh.read())
 
     def switch_window(self):
+        """
+        Switch window using QStackedWidget.
+        All menus will be hidden
+        """
+        # Switch window
         if self.ui.sender().objectName() == self.drop_menu.menu.w1_btn.objectName():
             self.setWindowTitle("Ballistics")
             self.ui.setCurrentIndex(0)
         elif self.ui.sender().objectName() == self.drop_menu.menu.w2_btn.objectName():
             self.setWindowTitle("Calcs")
             self.ui.setCurrentIndex(1)
+        # Uncheck buttons and hide menus
         self.drop_btn.setChecked(False)
         self.auth_btn.setChecked(False)
         self.drop_menu.show_hide_menu()
@@ -82,6 +95,7 @@ class Window(QWidget):
 
 
 if __name__ == "__main__":
+    # Create folder for log and load log configuration
     create_dir("logs")
     logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
     app = Qt.QApplication([])

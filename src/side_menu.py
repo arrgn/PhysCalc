@@ -22,11 +22,16 @@ class SideMenu:
         uic.loadUi(path_to_file(self.path), self.menu)
 
         self.menu.closer.clicked.connect(self.close)
+
+        # Configure animation
         self.animation = QPropertyAnimation(self.menu, b"size", self.widget.ui)
         self.update_animation()
         self.animation.setDuration(self.duration)
 
     def show_hide_menu(self):
+        """
+        Check button status and show or hide menu
+        """
         if self.btn.isChecked():
             self.btn.hide()
             self.animation.setDirection(QtCore.QAbstractAnimation.Forward)
@@ -40,6 +45,9 @@ class SideMenu:
         self.update_animation()
 
     def update_animation(self):
+        """
+        Update animation with new window sizes
+        """
         if self.left:
             self.menu.setGeometry(QtCore.QRect(0, 0, self.width, self.widget.height()))
         else:

@@ -15,7 +15,7 @@ class ProfileWindow(QDialog):
         self.change_btn = QPushButton()
         self.browse = QPushButton()
         self.restore = QPushButton()
-        self.error = QLabel()
+        self.error = QLabel()  # Label for status and errors
         self.avatar = QLabel()
 
         self.init_ui()
@@ -31,9 +31,11 @@ class ProfileWindow(QDialog):
 
         self.load_avatar()
 
+        # Load stylesheet
         ssh_file = path_to_file("themes", "SpyBot.qss")
         with open(ssh_file, "r") as fh:
             self.setStyleSheet(fh.read())
+
         self.show()
 
     def change_username(self):
@@ -47,12 +49,13 @@ class ProfileWindow(QDialog):
         self.error.setText(f"Name was successfully changed to {new_name}.")
 
     def browse_files(self):
+        # Open file-explorer to load avatar
         file_name = QFileDialog.getOpenFileName(self, "Open file", path_to_userdata("", str(user.get_user_id())),
                                                 "Image (*.png *.jpg)")[0]
         if file_name == "":
             logger.warning("Got null filename")
             return
-        copy_file(file_name, str(user.get_user_id()))
+        copy_file(file_name, str(user.get_user_id()))  # Save avatar in userdata
         user.change_avatar(basename(file_name))
         self.load_avatar()
 
@@ -63,6 +66,7 @@ class ProfileWindow(QDialog):
     def load_avatar(self):
         path_to_avatar = user.get_avatar()
         if path_to_avatar:
+            # If path exists, then scale avatar to 64x64 size
             smaller_pixmap = QPixmap(path_to_avatar).scaled(64, 64, Qt2.KeepAspectRatio, Qt2.FastTransformation)
             self.avatar.setPixmap(smaller_pixmap)
         else:

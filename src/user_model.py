@@ -77,6 +77,9 @@ class User:
         return False
 
     def get_workspaces(self):
+        """
+        Get ALL workspaces from user
+        """
         try:
             res = self.dao.get_workspaces_by_user(self.name)
             return res
@@ -85,6 +88,9 @@ class User:
         return False
 
     def get_workspace(self, ws_name):
+        """
+        Get CURRENT workspace from user
+        """
         try:
             res = self.dao.get_workspace(self.name, ws_name)
             return res

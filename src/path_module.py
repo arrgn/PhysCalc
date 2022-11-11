@@ -6,10 +6,17 @@ from loggers import logger
 
 
 def path_to_file(*elements) -> str:
+    """
+    :param elements: parts of local path to file (or directory)
+    :return: string - full path to file (or directory)
+    """
     return path.join(Path(__file__).parent.resolve(), *elements)
 
 
 def path_to_userdata(filename: str, username: str) -> str:
+    """
+    :return: path to file from user's folder
+    """
     return path.join(Path(__file__).parent.resolve(), "userdata", username, filename)
 
 
@@ -21,6 +28,9 @@ def copy_file(src, username):
 
 
 def create_user_dir(username):
+    """
+    Create dir for current user in userdata
+    """
     try:
         makedirs(path_to_userdata("", username))
     except FileExistsError:
