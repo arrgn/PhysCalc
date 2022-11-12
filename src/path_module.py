@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 from os import path, makedirs
-from os.path import basename
+from os.path import basename, isdir
 from loggers import logger
 
 
@@ -39,6 +39,7 @@ def create_user_dir(username):
 
 def create_dir(dirname):
     try:
-        makedirs(path_to_file(dirname))
+        if not isdir(path_to_file(dirname)):
+            makedirs(path_to_file(dirname))
     except FileExistsError:
         logger.exception("Tracked exception occurred!")
