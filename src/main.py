@@ -1,15 +1,17 @@
+import logging
+import logging.config
+
 from PyQt5 import Qt
 from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
+
+from auth_window import AuthWindow
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from third_window import ThirdWindow
-from side_menu import SideMenu
-from auth_window import AuthWindow
-from profile_window import ProfileWindow
 from path_module import path_to_file, create_dir
-import logging.config
-import logging
+from profile_window import ProfileWindow
+from side_menu import SideMenu
+from third_window import ThirdWindow
 
 
 class Window(QWidget):
@@ -35,7 +37,7 @@ class Window(QWidget):
         self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
-        self.ui.addWidget(ThirdWindow().ui)
+        self.ui.addWidget(ThirdWindow(self).ui)
 
         self.drop_btn = QPushButton(self)
         self.auth_btn = QPushButton(self)

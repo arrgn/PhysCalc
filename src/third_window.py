@@ -3,14 +3,16 @@ import random
 import sys
 from copy import deepcopy
 from math import radians, cos, sin
+
 from PyQt5 import QtCore
 from PyQt5 import uic
 from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
 from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QLineEdit
 from PyQt5.QtWidgets import QWidget
-from path_module import path_to_file, path_to_userdata
+
 from config import user
+from path_module import path_to_file, path_to_userdata
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -53,6 +55,8 @@ class ThirdWindow:
                 self.initUI()
 
             def initUI(self):
+
+
                 if self.show_button_ok:
                     QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
                 else:
@@ -90,8 +94,9 @@ class ThirdWindow:
                 self.shared.pop()
                 self.shared.append(self.filename.text())
 
-        def __init__(self):
+        def __init__(self, parentwindow=None):
             super().__init__()
+            self.parentwindow = parentwindow
             self.setMouseTracking(True)
             self.btn1_drawcoards = []
             self.btn1_wait_to_click = -1
@@ -587,7 +592,7 @@ class ThirdWindow:
         def moose_set_in_widget(self, mouse_coards, qwidget):
             gp = qwidget.mapToGlobal(QtCore.QPoint(0, 0))
             widget = gp.x(), gp.y()
-            window = (self.geometry().x(), self.geometry().y())
+            window = (self.x(), self.y()) if not self.parentwindow else (self.parentwindow.x(), self.parentwindow.y())
             widget_coards = (widget[0] - window[0], widget[1] - window[1])
             widget_size = (qwidget.geometry().width(), qwidget.geometry().height())
             widget_coards2 = (widget_coards[0] + widget_size[0], widget_coards[1] + widget_size[1])
@@ -602,7 +607,7 @@ class ThirdWindow:
             '''
             gp = qwidget.mapToGlobal(QtCore.QPoint(0, 0))
             widget = gp.x(), gp.y()
-            window = (self.geometry().x(), self.geometry().y())
+            window = (self.x(), self.y()) if not self.parentwindow else (self.parentwindow.x(), self.parentwindow.y())
             widget_coards = (widget[0] - window[0], widget[1] - window[1])
             widget_size = (qwidget.geometry().width(), qwidget.geometry().height())
             widget_coards2 = (widget_coards[0] + widget_size[0], widget_coards[1] + widget_size[1])
@@ -616,7 +621,7 @@ class ThirdWindow:
             '''
             gp = qwidget.mapToGlobal(QtCore.QPoint(0, 0))
             widget = gp.x(), gp.y()
-            window = (self.geometry().x(), self.geometry().y())
+            window = (self.x(), self.y()) if not self.parentwindow else (self.parentwindow.x(), self.parentwindow.y())
             widget_coards = (widget[0] - window[0], widget[1] - window[1])
             widget_size = (qwidget.geometry().width(), qwidget.geometry().height())
             widget_coards2 = (widget_coards[0] + widget_size[0], widget_coards[1] + widget_size[1])
@@ -860,9 +865,9 @@ class ThirdWindow:
             # self.mousebtn.setText("Никакая")
             self.update()
 
-    def __init__(self):
+    def __init__(self, parentwindow=None):
         super().__init__()
-        self.ui = self.DrawWindow()
+        self.ui = self.DrawWindow(parentwindow)
 
     def show(self):
         self.ui.show()
