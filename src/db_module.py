@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS workspaces
         if not user:
             raise self.UserDoesntExistError(f"user with name {username} doesnt exist")
         sql = """INSERT INTO workspaces VALUES(?, ?, ?, ?)"""
-        res = self.cur.execute(sql, [user[0][0], path_to_userdata(filename, str(user[0][0])), title, description])
+        res = self.cur.execute(sql, [user[0][0], filename, title, description])
         self.con.commit()
         return list(res)
 
@@ -114,7 +114,9 @@ CREATE TABLE IF NOT EXISTS workspaces
         user = self.get_user_by_name(name)
         if not user:
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
-        sql = """SELECT title, file, description FROM workspaces JOIN users ON id=user_id WHERE id=? AND title=?"""
+        sql = """
+SELECT user_id, title, file, description FROM workspaces JOIN users ON id=user_id WHERE id=? AND title=?
+        """
         res = self.cur.execute(sql, [user[0][0], ws_name])
         if not res:
             raise self.WorkspaceNotFoundError(f"workspace with name {ws_name} was not found at user {name}")
