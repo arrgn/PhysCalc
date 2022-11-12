@@ -673,8 +673,8 @@ class ThirdWindow:
         def keyPressEvent(self, event):
             if event.key() in [Qt2.Key_Delete, Qt2.Key_Backspace]:
                 self.delete_selected()
-            if event.key() == Qt2.Key_Z and Qt2.Key_Control in self.keys:
-                self.btn3_click()
+            # if event.key() == Qt2.Key_Z and Qt2.Key_Control in self.keys:
+            #     self.btn3_click()
             if event.key() == Qt2.Key_Escape:
                 self.flag_down()
                 self.selected = None
