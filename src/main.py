@@ -1,15 +1,19 @@
+import logging.config
+import sys
+import traceback
+
 from PyQt5 import Qt
 from PyQt5.QtCore import QPropertyAnimation
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
+
+from auth_window import AuthWindow
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from third_window import ThirdWindow
-from side_menu import SideMenu
-from auth_window import AuthWindow
-from profile_window import ProfileWindow
 from path_module import path_to_file, create_dir
-import logging.config
-import logging
+from profile_window import ProfileWindow
+from side_menu import SideMenu
+from third_window import ThirdWindow
+from loggers import logger
 
 
 class Window(QWidget):
@@ -100,10 +104,15 @@ class Window(QWidget):
         super().show()
 
 
+def log_handler(exctype, value, tb):
+    logger.exception(''.join(traceback.format_exception(exctype, value, tb)))
+
+
 if __name__ == "__main__":
     # Create folder for log and load log configuration
     create_dir("logs")
     logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
+    sys.excepthook = log_handler
     app = Qt.QApplication([])
     w = Window()
     w.show()
