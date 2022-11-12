@@ -81,7 +81,12 @@ class User:
         Get ALL workspaces from user
         """
         try:
-            res = self.dao.get_workspaces_by_user(self.name)
+            dao_res = self.dao.get_workspaces_by_user(self.name)
+            res = list(map(lambda x: {
+                "title": x[0],
+                "file": x[1],
+                "description": x[2]
+            }, dao_res))
             return res
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")
@@ -92,7 +97,13 @@ class User:
         Get CURRENT workspace from user
         """
         try:
-            res = self.dao.get_workspace(self.name, ws_name)
+            res_dao = self.dao.get_workspace(self.name, ws_name)[0]
+            res = {
+                "user_id": res_dao[0],
+                "title": res_dao[1],
+                "file": res_dao[2],
+                "description": res_dao[3]
+            }
             return res
         except (DAO.UserDoesntExistError, DAO.WorkspaceNotFoundError):
             logger.exception("Tracked exception occurred!")
@@ -100,7 +111,7 @@ class User:
 
     def add_workspace(self, ws_name, file, description=""):
         try:
-            self.dao.add_workspace_to_user(self.name, ws_name, file, description)
+            self.dao.add_workspace_to_user(self.name, file, ws_name, description)
             return True
         except DAO.UserDoesntExistError:
             logger.exception("Tracked exception occurred!")

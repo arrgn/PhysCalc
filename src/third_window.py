@@ -3,14 +3,16 @@ import random
 import sys
 from copy import deepcopy
 from math import radians, cos, sin
+
 from PyQt5 import QtCore
 from PyQt5 import uic
 from PyQt5.QtCore import Qt as Qt2
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
-from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QLineEdit
-from PyQt5.QtWidgets import QWidget
-from path_module import path_to_file, path_to_userdata
+from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QLineEdit, QWidget, QComboBox
+
 from config import user
+from path_module import path_to_file, path_to_userdata
+from loggers import logger
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -41,18 +43,18 @@ class ThirdWindow:
             return number of pressed button
             '''
 
-            def __init__(self, text, title, shared=None, show_button_ok=False):
-
+            def __init__(self, text, title, mode="Ask", shared=None, out=None, show_button_ok=False):
                 super().__init__()
                 self.text = text
                 self.show_button_ok = show_button_ok
                 self.title = title
+                self.mode = mode
                 self.shared = shared
-                self.ask_for_file = QLabel()
-                self.filename = QLineEdit()
-                self.initUI()
+                self.out = out
 
-            def initUI(self):
+                self.init_ui()
+
+            def init_ui(self):
                 if self.show_button_ok:
                     QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
                 else:
@@ -67,16 +69,31 @@ class ThirdWindow:
                 self.layout.addWidget(message)
                 self.layout.addWidget(self.buttonBox)
 
-                if self.shared is not None:
-                    self.ask_for_file = QLabel(self)
-                    self.ask_for_file.setText("Enter workspace name: ")
+                if self.mode == "Save ws":
+                    self.ask_for_name = QLabel(self)
+                    self.ask_for_name.setText("Enter workspace name:")
+                    self.name = QLineEdit(self)
+                    self.name.textChanged.connect(self.get_save_data)
 
-                    self.filename = QLineEdit(self)
-                    self.filename.setText(self.shared[0])
-                    self.filename.textChanged.connect(self.get_filename)
+                    self.ask_for_description = QLabel(self)
+                    self.ask_for_description.setText("Enter workspace description:")
+                    self.description = QLineEdit(self)
+                    self.description.textChanged.connect(self.get_save_data)
 
-                    self.layout.addWidget(self.ask_for_file)
-                    self.layout.addWidget(self.filename)
+                    self.layout.addWidget(self.ask_for_name)
+                    self.layout.addWidget(self.name)
+                    self.layout.addWidget(self.ask_for_description)
+                    self.layout.addWidget(self.description)
+                elif self.mode == "Get ws":
+                    self.ws_list = QComboBox(self)
+
+                    for el in self.shared:
+                        self.ws_list.addItem(el["title"])
+                    self.choose_ws()
+
+                    self.ws_list.activated.connect(lambda: self.choose_ws())
+
+                    self.layout.addWidget(self.ws_list)
 
                 self.setLayout(self.layout)
                 self.setWindowTitle(self.title)
@@ -86,12 +103,16 @@ class ThirdWindow:
                 with open(ssh_file, "r") as fh:
                     self.setStyleSheet(fh.read())
 
-            def get_filename(self):
-                self.shared.pop()
-                self.shared.append(self.filename.text())
+            def get_save_data(self):
+                self.out["title"] = self.name.text()
+                self.out["description"] = self.description.text()
 
-        def __init__(self):
+            def choose_ws(self):
+                self.out["title"] = self.ws_list.currentText()
+
+        def __init__(self, parentwindow=None):
             super().__init__()
+            self.parentwindow = parentwindow
             self.setMouseTracking(True)
             self.btn1_drawcoards = []
             self.btn1_wait_to_click = -1
@@ -329,7 +350,7 @@ class ThirdWindow:
                         self.object_history.pop()
 
             except:
-                pass
+                logger.exception("Tracked exception occurred!")
             finally:
                 if co == len(self.object_history) and co != 0:
                     self.object_history.pop()
@@ -363,8 +384,9 @@ class ThirdWindow:
                 # print("cleaned")
 
         def btn5_click(self):
-            shared = ["data.json"]
-            rs = self.Dialog("Вы уверены, что хотите заменить сохранение?", "Сохранение", shared, True).exec()
+            shared = {}
+            rs = self.Dialog("Вы уверены, что хотите сохранить холст?", "Сохранение", mode="Save ws", out=shared,
+                             show_button_ok=True).exec()
             buf = deepcopy(self.render_objects)
             if rs:
                 for i in range(len(buf[2])):
@@ -377,31 +399,35 @@ class ThirdWindow:
                     "render_objects": buf,
                     "object_history": self.object_history
                 }
-                print(user.get_user(), user.get_user_id())
-                with open(path_to_userdata(shared[0], str(user.get_user_id())), "w") as file:
-                    json.dump(data, file)
-
-                # print("SAVED")
+                try:
+                    shared["filename"] = shared["title"] + ".json"
+                    with open(path_to_userdata(shared["filename"], str(user.get_user_id())), "w") as file:
+                        json.dump(data, file)
+                        user.add_workspace(shared["title"], shared["filename"], shared["description"])
+                except NameError:
+                    logger.exception("Tracked exception occurred!")
 
         def btn6_click(self):
-            shared = ["data.json"]
-            rs = self.Dialog("Вы уверены, что хотите загрузить сохранение?", "Сохранение", shared, True).exec()
+            shared = user.get_workspaces()
+            out = {}
+            rs = self.Dialog("Вы уверены, что хотите загрузить сохранение?", "Сохранение", mode="Get ws", shared=shared,
+                             out=out, show_button_ok=True).exec()
             if rs:
                 try:
                     self.flag_down()
-                    with open(path_to_userdata(shared[0], str(user.get_user_id())), "r") as file:
+                    ws = user.get_workspace(out["title"])
+                    with open(path_to_userdata(ws["file"], str(user.get_user_id())), "r") as file:
                         data = json.load(file)
                         buf = data["render_objects"]
                         for i in range(len(buf[2])):
                             buf[2][i] = buf[2][i][:2] + [self.colors[buf[2][i][2]]]
                         self.object_history = data["object_history"]
                         self.render_objects = deepcopy(buf)
-                        # print("LOADED")
-                except:
-                    self.Dialog("Не найдено сохранение или оно некоректно", "Сохранение").exec()
+                except (FileNotFoundError, AttributeError):
+                    logger.exception("Tracked exception occurred!")
+                    self.Dialog("Не найдено сохранение или оно некорректно", "Сохранение").exec()
 
         def btn7_click(self):
-            # print("mode: DELETERECT")
             self.flag_down()
             if self.btn7_wait_to_click == -1:
                 self.btn7_wait_to_click = 0
@@ -442,7 +468,7 @@ class ThirdWindow:
                     self.spinBox.setValue(0)
                     self.dial.setValue(0)
             except:
-                pass
+                logger.exception("Tracked exception occurred!")
             self.update()
 
         def inRange(self, mi, ma, coard):
@@ -587,7 +613,7 @@ class ThirdWindow:
         def moose_set_in_widget(self, mouse_coards, qwidget):
             gp = qwidget.mapToGlobal(QtCore.QPoint(0, 0))
             widget = gp.x(), gp.y()
-            window = (self.geometry().x(), self.geometry().y())
+            window = (self.x(), self.y()) if not self.parentwindow else (self.parentwindow.x(), self.parentwindow.y())
             widget_coards = (widget[0] - window[0], widget[1] - window[1])
             widget_size = (qwidget.geometry().width(), qwidget.geometry().height())
             widget_coards2 = (widget_coards[0] + widget_size[0], widget_coards[1] + widget_size[1])
@@ -602,7 +628,7 @@ class ThirdWindow:
             '''
             gp = qwidget.mapToGlobal(QtCore.QPoint(0, 0))
             widget = gp.x(), gp.y()
-            window = (self.geometry().x(), self.geometry().y())
+            window = (self.x(), self.y()) if not self.parentwindow else (self.parentwindow.x(), self.parentwindow.y())
             widget_coards = (widget[0] - window[0], widget[1] - window[1])
             widget_size = (qwidget.geometry().width(), qwidget.geometry().height())
             widget_coards2 = (widget_coards[0] + widget_size[0], widget_coards[1] + widget_size[1])
@@ -616,7 +642,7 @@ class ThirdWindow:
             '''
             gp = qwidget.mapToGlobal(QtCore.QPoint(0, 0))
             widget = gp.x(), gp.y()
-            window = (self.geometry().x(), self.geometry().y())
+            window = (self.x(), self.y()) if not self.parentwindow else (self.parentwindow.x(), self.parentwindow.y())
             widget_coards = (widget[0] - window[0], widget[1] - window[1])
             widget_size = (qwidget.geometry().width(), qwidget.geometry().height())
             widget_coards2 = (widget_coards[0] + widget_size[0], widget_coards[1] + widget_size[1])
@@ -677,7 +703,7 @@ class ThirdWindow:
             try:
                 del self.keys[self.keys.index(event.key())]
             except:
-                pass
+                logger.exception("Tracked exception occurred!")
 
         def mouseMoveEvent(self, event):
             mouse_coards = (event.x(), event.y())
@@ -860,9 +886,9 @@ class ThirdWindow:
             # self.mousebtn.setText("Никакая")
             self.update()
 
-    def __init__(self):
+    def __init__(self, parentwindow=None):
         super().__init__()
-        self.ui = self.DrawWindow()
+        self.ui = self.DrawWindow(parentwindow)
 
     def show(self):
         self.ui.show()

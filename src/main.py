@@ -39,7 +39,7 @@ class Window(QWidget):
         self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
-        self.ui.addWidget(ThirdWindow().ui)
+        self.ui.addWidget(ThirdWindow(self).ui)
 
         self.drop_btn = QPushButton(self)
         self.auth_btn = QPushButton(self)
