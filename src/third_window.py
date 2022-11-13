@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout
 from config import user
 from path_module import path_to_file, path_to_userdata
 from loggers import logger
+import pyperclip
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -134,12 +135,15 @@ class ThirdWindow:
             self.mouse_tracking = False
             self.moving = None
             self.hidden = None
+            self.collisionoff = True
             self.colors = {"red": Qt2.darkRed, "green": Qt2.darkGreen, "blue": Qt2.darkBlue, "cyan": Qt2.darkCyan,
                            "white": Qt2.white, "grey": Qt2.darkGray, "transparent": Qt2.transparent}
             self.colorsback1 = [Qt2.darkRed, Qt2.darkGreen, Qt2.darkBlue, Qt2.darkCyan, Qt2.white, Qt2.darkGray,
                                 Qt2.transparent]
             self.colorsback2 = ["red", "green", "blue", "cyan", "white", "grey",
                                 "transparent"]
+            self.recte_formule = r"\left|\frac{\left(x-X\right)\cos\alpha-\left(y+Y\right)\sin\alpha}{W}-\frac{\left(x-X\right)\sin\alpha+\left(y+Y\right)\cos\alpha}{H}\right|+\left|\frac{\left(x-X\right)\cos\alpha-\left(y+Y\right)\sin\alpha}{W}+\frac{\left(x-X\right)\sin\alpha+\left(y+Y\right)\cos\alpha}{H}\right|-1"
+            self.line_formule = r"\sqrt{\left(x\ -\ A\right)\ ^{2}\ +\ \left(y\ +\ B\right)^{2}}\ +\ \sqrt{\left(x\ -\ C\right)\ ^{2}\ +\ \left(y\ +\ D\right)^{2}}\ -\ \left(\sqrt{\left(C\ -\ A\right)\ ^{2}\ +\ \left(B\ -\ D\right)^{2}}\ +\ 0.01\right)\ "
             self.initUI()
 
         def initUI(self):
@@ -148,7 +152,7 @@ class ThirdWindow:
             self.mousebtn.setText("")
             self.btn1.setText("Линия")
             self.btn2.setText("Прямоугольник")
-            # self.btn3.setText("Отмена")
+            self.btn3.setText("Скопировать формулу")
             self.btn4.setText("Очистка")
             self.btn5.setText("Сохранить")
             self.btn6.setText("Загрузить")
@@ -156,7 +160,7 @@ class ThirdWindow:
             self.sandbox.setText("")
             self.btn1.clicked.connect(lambda: self.btn1_click())
             self.btn2.clicked.connect(lambda: self.btn2_click())
-            # self.btn3.clicked.connect(lambda: self.btn3_click())
+            self.btn3.clicked.connect(lambda: self.create_formula())
             self.btn4.clicked.connect(lambda: self.btn4_click())
             self.btn5.clicked.connect(lambda: self.btn5_click())
             self.btn6.clicked.connect(lambda: self.btn6_click())
@@ -176,7 +180,47 @@ class ThirdWindow:
             self.dial.hide()
             self.colorbox.hide()
             self.spinBox.hide()
-            self.btn3.hide()
+
+        def create_recte_formule(self, centre, we, he, alphe):
+            xe, ye = centre[0], centre[1]
+            ye -= self.get_widget_metrix(self.sandbox)[0][1] + self.get_widget_metrix(self.sandbox)[2][1]
+            xe -= self.get_widget_metrix(self.sandbox)[0][0]
+            return self.recte_formule.replace(r"\alpha", f"{radians(alphe)}").replace("X", f"{xe}").replace("Y", f"{ye}").replace("W", f"{we}").replace("H", f"{he}")
+
+        def create_line_formule(self, p1, p2):
+            p1[1] -= self.get_widget_metrix(self.sandbox)[0][1] + self.get_widget_metrix(self.sandbox)[2][1]
+            p2[1] -= self.get_widget_metrix(self.sandbox)[0][1] + self.get_widget_metrix(self.sandbox)[2][1]
+            p1[0] -= self.get_widget_metrix(self.sandbox)[0][0]
+            p2[0] -= self.get_widget_metrix(self.sandbox)[0][0]
+            return self.line_formule.replace("A", str(p1[0])).replace("B", str(p1[1])).replace("C", str(p2[0])).replace("D", str(p2[1]))
+
+
+        def create_formule(self, rects, lines):
+            ans = f"({rects[0]})"
+            for i in rects[1:]:
+                ans += fr"\cdot ({i})"
+            for i in lines:
+                ans += fr"\cdot ({i})"
+            ans += "=0"
+            pyperclip.copy(ans)
+            return ans
+
+        def create_formula(self):
+            rect_formules = []
+            lines_formules = []
+            buf = deepcopy(self.render_objects[2])
+            rect = self.get_widget_metrix(self.sandbox)[:2]
+            buf.append([self.get_all_points(rect), 0])
+            for i in buf:
+                rect = i[0]
+                angle = i[1]
+                r = [[(rect[1][0] + rect[0][0]) / 2, (rect[1][1] + rect[2][1]) / 2], rect[1][0] - rect[0][0], rect[1][1] - rect[2][1], angle]
+                rect_formules.append(self.create_recte_formule(*r))
+            buf = deepcopy(self.render_objects[1])
+            for i in buf:
+                i = [[i[0], i[1]], [i[2], i[3]]]
+                lines_formules.append(self.create_line_formule(i[0], i[1]))
+            self.create_formule(rect_formules, lines_formules)
 
         def renderf(self, qp):
 
@@ -250,6 +294,7 @@ class ThirdWindow:
             ans[2] = [(cos(a) * (-w) - sin(a) * (-h)) / 2 + center[0], (sin(a) * (-w) + cos(a) * (-h)) / 2 + center[1]]
             ans[3] = [(cos(a) * w - sin(a) * (-h)) / 2 + center[0], (sin(a) * w + cos(a) * (-h)) / 2 + center[1]]
             return ans
+
 
         def rotate_rect(self, rect, angle):
             '''
@@ -726,8 +771,8 @@ class ThirdWindow:
                           [buf[0][2][0] + dx, buf[0][2][1] + dy], [buf[0][3][0] + dx, buf[0][3][1] + dy]]
                 self.hide = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
                 if not self.RectAndWidgetCollision(self.rotate_rect(buf[0], buf[1]),
-                                                   self.sandbox) and not self.RectAnfRenderObjCollision(
-                    self.rotate_rect(buf[0], buf[1]), self.render_objects):
+                                                   self.sandbox) and (not self.RectAnfRenderObjCollision(
+                    self.rotate_rect(buf[0], buf[1]), self.render_objects) or self.collisionoff) :
                     self.moving = buf
                 else:
                     pass
@@ -824,7 +869,7 @@ class ThirdWindow:
                 if self.line_len(line) > 100:
                     line = [[line[0], line[1]], [line[2], line[3]]]
                     for i in self.render_objects[2]:
-                        if self.RectAndLineCollision(self.rotate_rect(i[0], i[1]), line):
+                        if self.RectAndLineCollision(self.rotate_rect(i[0], i[1]), line) and not self.collisionoff:
                             flag = False
                     if flag:
                         self.render_objects[1].append(self.transform_coards_for_line(self.btn1_drawcoards))
@@ -837,7 +882,7 @@ class ThirdWindow:
             if mouse_btn == 1 and len(self.btn2_drawcoards) == 2:
                 rect = [self.get_all_points(self.btn2_drawcoards), 0]
                 if self.area(rect[0]) > 500:
-                    if not self.RectAnfRenderObjCollision(rect[0], self.render_objects):
+                    if not self.RectAnfRenderObjCollision(rect[0], self.render_objects) or self.collisionoff:
                         self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0, Qt2.darkGray])
                         # print(
                         #     f"drawn RECT ({self.render_objects[2][-1][0][0]}, {self.render_objects[2][-1][0][1]}, {self.render_objects[2][-1][0][2]}, {self.render_objects[2][-1][0][3]})")
@@ -852,13 +897,13 @@ class ThirdWindow:
                 for i in self.render_objects[2]:
                     if len(i) >= 2 and i != self.hide and i != self.selected:
                         j = self.rotate_rect(i[0], i[1])
-                        if not self.RectAndRectCollision(rect[0], j):
+                        if not self.RectAndRectCollision(rect[0], j) or self.collisionoff:
                             buf[2].append(self.render_objects[2][self.render_objects[2].index(i)])
 
                 for i in self.render_objects[1]:
                     if len(i) == 4:
                         j = [[i[0], i[1]], [i[2], i[3]]]
-                        if not self.RectAndLineCollision(rect[0], j):
+                        if not self.RectAndLineCollision(rect[0], j) or self.collisionoff:
                             buf[1].append(self.render_objects[1][self.render_objects[1].index(i)])
 
                 self.render_objects = deepcopy(buf)
