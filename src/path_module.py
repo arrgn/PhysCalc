@@ -10,14 +10,14 @@ def path_to_file(*elements) -> str:
     :param elements: parts of local path to file (or directory)
     :return: string - full path to file (or directory)
     """
-    return path.join(Path(__file__).parent.resolve(), *elements)
+    return path.join(*elements)
 
 
 def path_to_userdata(filename: str, user_id: str) -> str:
     """
     :return: path to file from user's folder
     """
-    return path.join(Path(__file__).parent.resolve(), "userdata", user_id, filename)
+    return path.join("userdata", user_id, filename)
 
 
 def copy_file(src, username):
