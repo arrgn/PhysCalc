@@ -135,7 +135,7 @@ class ThirdWindow:
             self.mouse_tracking = False
             self.moving = None
             self.hidden = None
-            self.collisionoff = True
+            self.collisionoff = False
             self.colors = {"red": Qt2.darkRed, "green": Qt2.darkGreen, "blue": Qt2.darkBlue, "cyan": Qt2.darkCyan,
                            "white": Qt2.white, "grey": Qt2.darkGray, "transparent": Qt2.transparent}
             self.colorsback1 = [Qt2.darkRed, Qt2.darkGreen, Qt2.darkBlue, Qt2.darkCyan, Qt2.white, Qt2.darkGray,
