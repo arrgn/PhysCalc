@@ -11,5 +11,5 @@
 * Рисунок, на котором будут отображены силы, действующие на тела на нем
 
 # Что необходимо установить?
-* Пользователи windows могут воспользоваться [установщиком](https://disk.yandex.ru/d/fmOxz-Vtm_ZQ9w).
+* Пользователи windows могут воспользоваться [установщиком](https://github.com/arrgn/PhysCalc/releases/download/v1.0.0/PhysCalcSetup.exe).
 * Все остальные должны установить python3 (проект работает на версии python 3.9) и библиотеки из src/requirements.txt
