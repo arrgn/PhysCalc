@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS workspaces
         if not user:
             raise self.UserDoesntExistError(f"user with name {name} doesnt exist")
         sql = """UPDATE users SET avatar=? WHERE id=?"""
-        res = self.cur.execute(sql, [path_to_userdata(avatar, str(user[0][0])), user[0][0]])
+        res = self.cur.execute(sql, [avatar, user[0][0]])
         self.con.commit()
         return res
 

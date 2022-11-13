@@ -64,7 +64,7 @@ class ProfileWindow(QDialog):
         self.load_avatar()
 
     def load_avatar(self):
-        path_to_avatar = user.get_avatar()
+        path_to_avatar = path_to_userdata(user.get_avatar(), str(user.get_user_id()))
         if path_to_avatar:
             # If path exists, then scale avatar to 64x64 size
             smaller_pixmap = QPixmap(path_to_avatar).scaled(64, 64, Qt2.KeepAspectRatio, Qt2.FastTransformation)

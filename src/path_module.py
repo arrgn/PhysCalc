@@ -13,11 +13,11 @@ def path_to_file(*elements) -> str:
     return path.join(Path(__file__).parent.resolve(), *elements)
 
 
-def path_to_userdata(filename: str, username: str) -> str:
+def path_to_userdata(filename: str, user_id: str) -> str:
     """
     :return: path to file from user's folder
     """
-    return path.join(Path(__file__).parent.resolve(), "userdata", username, filename)
+    return path.join(Path(__file__).parent.resolve(), "userdata", user_id, filename)
 
 
 def copy_file(src, username):

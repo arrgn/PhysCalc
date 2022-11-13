@@ -11,6 +11,16 @@ class User:
         if database is not None:
             self.dao = database
 
+    def log_out(self):
+        try:
+            res = self.dao.get_user_by_id(1)
+            self.name = res[0][1]
+            self.id = 1
+            return res
+        except DAO.UserDoesntExistError:
+            logger.exception("Tracked exception occurred!")
+        return False
+
     def add_user(self, name, password):
         try:
             self.dao.add_user(name, password)

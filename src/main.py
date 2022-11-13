@@ -3,13 +3,15 @@ import sys
 import traceback
 
 from PyQt5 import Qt
-from PyQt5.QtCore import QPropertyAnimation
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 
+from config import user
 from auth_window import AuthWindow
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
-from path_module import path_to_file, create_dir
+from path_module import path_to_file, create_dir, path_to_userdata
 from profile_window import ProfileWindow
 from side_menu import SideMenu
 from third_window import ThirdWindow
@@ -50,9 +52,10 @@ class Window(QWidget):
         self.drop_menu.menu.w1_btn.clicked.connect(self.switch_window)
         self.drop_menu.menu.w2_btn.clicked.connect(self.switch_window)
         self.drop_menu.menu.w3_btn.clicked.connect(self.switch_window)
-        self.auth_menu.menu.sign_in.clicked.connect(lambda: AuthWindow(True).exec())
-        self.auth_menu.menu.sign_up.clicked.connect(lambda: AuthWindow(False).exec())
-        self.auth_menu.menu.profile.clicked.connect(lambda: ProfileWindow().exec())
+        self.auth_menu.menu.sign_in.clicked.connect(lambda: (AuthWindow(True).exec(), self.set_user_avatar()))
+        self.auth_menu.menu.sign_up.clicked.connect(lambda: (AuthWindow(False).exec(), self.set_user_avatar()))
+        self.auth_menu.menu.profile.clicked.connect(lambda: (ProfileWindow().exec(), self.set_user_avatar()))
+        self.auth_menu.menu.log_out.clicked.connect(lambda: (user.log_out(), self.set_user_avatar()))
 
         # Connect buttons to drop menus (show/hide)
         self.drop_btn.setCheckable(True)
@@ -72,6 +75,8 @@ class Window(QWidget):
         ssh_file = path_to_file("themes", "SpyBot.qss")
         with open(ssh_file, "r") as fh:
             self.setStyleSheet(fh.read())
+
+        self.set_user_avatar()
 
     def switch_window(self):
         """
@@ -98,6 +103,10 @@ class Window(QWidget):
         self.drop_menu.resize_event()
         self.auth_menu.resize_event()
         self.auth_btn.move(self.width() - 30, 5)
+
+    def set_user_avatar(self):
+        self.auth_btn.setIcon(QIcon(path_to_userdata(user.get_avatar(), str(user.get_user_id()))))
+        self.auth_btn.setIconSize(QSize(25, 25))
 
     def show(self):
         self.ui.show()
