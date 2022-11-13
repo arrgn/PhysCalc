@@ -39,6 +39,9 @@ class User:
     def get_user_id(self):
         return self.id
 
+    def get_users(self):
+        return self.dao.get_users()
+
     def get_avatar(self):
         try:
             res = self.dao.get_user_by_name(self.name)

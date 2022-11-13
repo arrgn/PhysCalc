@@ -36,6 +36,11 @@ CREATE TABLE IF NOT EXISTS workspaces
         """
         self.cur.execute(build)
 
+    def get_users(self):
+        sql = """SELECT username FROM users WHERE username!=\"guest\""""
+        res = self.cur.execute(sql)
+        return list(res)
+
     def get_user_by_name(self, name):
         sql = """SELECT id, username, avatar FROM users WHERE username=?"""
         res = self.cur.execute(sql, [name])

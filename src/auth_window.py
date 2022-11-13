@@ -1,5 +1,5 @@
 from PyQt5 import Qt, uic
-from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import QDialog, QPushButton, QLineEdit, QLabel, QComboBox
 from path_module import path_to_file
 from config import user
 
@@ -11,16 +11,23 @@ class AuthWindow(QDialog):
         self.auth_btn = QPushButton()
         self.username = QLineEdit()
         self.password = QLineEdit()
+        self.users = QComboBox
         self.error = QLabel()  # Label to show status or errors
 
         self.init_ui()
 
     def init_ui(self):
-        uic.loadUi(path_to_file("uis", "auth_window.ui"), self)
+        if not self.is_login:
+            uic.loadUi(path_to_file("uis", "sign_up.ui"), self)
+        else:
+            uic.loadUi(path_to_file("uis", "sign_in.ui"), self)
 
         # Configure window to work with reg or login
         if self.is_login:
             self.auth_btn.setText("Sign In")
+            users = user.get_users()
+            for el in users:
+                self.users.addItem(el[0])
             self.auth_btn.clicked.connect(self.login)
         else:
             self.auth_btn.clicked.connect(self.register)
@@ -42,7 +49,7 @@ class AuthWindow(QDialog):
         self.error.setText(f"User {name} created. Successfully sign in via user {name}.")
 
     def login(self):
-        name = self.username.text()
+        name = self.users.currentText()
         password = self.password.text()
         res = user.set_user(name, password)
         if not res:

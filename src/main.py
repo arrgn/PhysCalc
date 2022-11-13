@@ -105,6 +105,10 @@ class Window(QWidget):
 
 
 def log_handler(exctype, value, tb):
+    """
+    Custom exception handler.
+    All critical errors will be logged with tag [ERROR]
+    """
     logger.exception(''.join(traceback.format_exception(exctype, value, tb)))
 
 
