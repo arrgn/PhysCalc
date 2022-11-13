@@ -196,8 +196,8 @@ class ThirdWindow:
 
 
         def create_formule(self, rects, lines):
-            ans = f"({rects[0]})"
-            for i in rects[1:]:
+            ans = f"({rects[-1]})"
+            for i in rects[:-1]:
                 ans += fr"\cdot ({i})"
             for i in lines:
                 ans += fr"\cdot ({i})"
