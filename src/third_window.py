@@ -897,13 +897,13 @@ class ThirdWindow:
                 for i in self.render_objects[2]:
                     if len(i) >= 2 and i != self.hide and i != self.selected:
                         j = self.rotate_rect(i[0], i[1])
-                        if not self.RectAndRectCollision(rect[0], j) or self.collisionoff:
+                        if not self.RectAndRectCollision(rect[0], j):
                             buf[2].append(self.render_objects[2][self.render_objects[2].index(i)])
 
                 for i in self.render_objects[1]:
                     if len(i) == 4:
                         j = [[i[0], i[1]], [i[2], i[3]]]
-                        if not self.RectAndLineCollision(rect[0], j) or self.collisionoff:
+                        if not self.RectAndLineCollision(rect[0], j):
                             buf[1].append(self.render_objects[1][self.render_objects[1].index(i)])
 
                 self.render_objects = deepcopy(buf)
