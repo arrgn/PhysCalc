@@ -866,7 +866,7 @@ class ThirdWindow:
                 flag = True
                 line = self.transform_coards_for_line(self.btn1_drawcoards)
                 # print(self.line_len(line))
-                if self.line_len(line) > 100:
+                if self.line_len(line) > 100 or self.collisionoff:
                     line = [[line[0], line[1]], [line[2], line[3]]]
                     for i in self.render_objects[2]:
                         if self.RectAndLineCollision(self.rotate_rect(i[0], i[1]), line) and not self.collisionoff:
@@ -881,7 +881,7 @@ class ThirdWindow:
 
             if mouse_btn == 1 and len(self.btn2_drawcoards) == 2:
                 rect = [self.get_all_points(self.btn2_drawcoards), 0]
-                if self.area(rect[0]) > 500:
+                if self.area(rect[0]) > 500 or self.collisionoff:
                     if not self.RectAnfRenderObjCollision(rect[0], self.render_objects) or self.collisionoff:
                         self.render_objects[2].append([self.get_all_points(self.btn2_drawcoards), 0, Qt2.darkGray])
                         # print(
