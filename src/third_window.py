@@ -777,7 +777,7 @@ class ThirdWindow:
                 else:
                     pass
 
-            self.mousepos.setText(f"Координаты: {event.x()}, {event.y()}")
+            self.mousepos.setText(f"Cords: {event.x()}, {event.y()}")
             self.update()
 
         def mousePressEvent(self, event):
@@ -851,7 +851,7 @@ class ThirdWindow:
 
             self.update()
 
-            self.mousepos.setText(f"Координаты:{event.x()}, {event.y()}")
+            self.mousepos.setText(f"Cords:{event.x()}, {event.y()}")
             # if (event.button() == Qt2.LeftButton):
             #     self.mousebtn.setText("Левая")
             # elif (event.button() == Qt2.RightButton):
