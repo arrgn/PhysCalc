@@ -1,3 +1,4 @@
+import logging
 import logging.config
 import sys
 import traceback
@@ -7,7 +8,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QStackedWidget, QPushButton, QWidget, QGridLayout
 
-from config import user
+from config import user, release
 from auth_window import AuthWindow
 from ballistic import BallisticWindow
 from calcs import CalcsWindow
@@ -125,6 +126,8 @@ if __name__ == "__main__":
     # Create folder for log and load log configuration
     create_dir("logs")
     logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
+    if release:
+        logging.disable(level=logging.WARNING)
     sys.excepthook = log_handler
     app = Qt.QApplication([])
     w = Window()
