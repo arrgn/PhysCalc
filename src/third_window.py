@@ -148,15 +148,15 @@ class ThirdWindow:
 
         def initUI(self):
             uic.loadUi(path_to_file("uis", "third_window.ui"), self)
-            self.mousepos.setText("Координаты: None, None")
+            self.mousepos.setText("Cords: None, None")
             self.mousebtn.setText("")
-            self.btn1.setText("Линия")
-            self.btn2.setText("Прямоугольник")
-            self.btn3.setText("Скопировать формулу")
-            self.btn4.setText("Очистка")
-            self.btn5.setText("Сохранить")
-            self.btn6.setText("Загрузить")
-            self.btn7.setText("Удалить")
+            self.btn1.setText("Line")
+            self.btn2.setText("Rect")
+            self.btn3.setText("Copy formula")
+            self.btn4.setText("Clear")
+            self.btn5.setText("Save")
+            self.btn6.setText("Upload")
+            self.btn7.setText("Delete")
             self.sandbox.setText("")
             self.btn1.clicked.connect(lambda: self.btn1_click())
             self.btn2.clicked.connect(lambda: self.btn2_click())
@@ -418,7 +418,7 @@ class ThirdWindow:
                 self.render_objects[2][self.render_objects[2].index(self.selected)][2] = color
 
         def btn4_click(self):
-            rs = self.Dialog("Вы уверены, что хотите очистить экран?", "Очистка", show_button_ok=True).exec()
+            rs = self.Dialog("Are you sure you want to clear the screen?", "Clearing", show_button_ok=True).exec()
             if rs:
                 self.btn1_drawcoards = []
                 self.render_objects = [[self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
@@ -430,7 +430,7 @@ class ThirdWindow:
 
         def btn5_click(self):
             shared = {}
-            rs = self.Dialog("Вы уверены, что хотите сохранить холст?", "Сохранение", mode="Save ws", out=shared,
+            rs = self.Dialog("Are you sure you want to save the canvas?", "Conservation", mode="Save ws", out=shared,
                              show_button_ok=True).exec()
             buf = deepcopy(self.render_objects)
             if rs:
@@ -455,7 +455,7 @@ class ThirdWindow:
         def btn6_click(self):
             shared = user.get_workspaces()
             out = {}
-            rs = self.Dialog("Вы уверены, что хотите загрузить сохранение?", "Сохранение", mode="Get ws", shared=shared,
+            rs = self.Dialog("Are you sure you want to upload a save?", "Conservation", mode="Get ws", shared=shared,
                              out=out, show_button_ok=True).exec()
             if rs:
                 try:
@@ -470,7 +470,7 @@ class ThirdWindow:
                         self.render_objects = deepcopy(buf)
                 except (FileNotFoundError, AttributeError):
                     logger.exception("Tracked exception occurred!")
-                    self.Dialog("Не найдено сохранение или оно некорректно", "Сохранение").exec()
+                    self.Dialog("No save found or it is incorrect", "Conservation").exec()
 
         def btn7_click(self):
             self.flag_down()
