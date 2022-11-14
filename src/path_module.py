@@ -1,5 +1,4 @@
 import shutil
-import sys
 
 from pathlib import Path
 from os import path, makedirs
