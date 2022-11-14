@@ -1,4 +1,4 @@
-import logging
+import logging.config
 import sys
 import traceback
 
@@ -124,13 +124,7 @@ def log_handler(exctype, value, tb):
 if __name__ == "__main__":
     # Create folder for log and load log configuration
     create_dir("logs")
-    # logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
-    logging.basicConfig(format="[%(levelname)s] [%(module)s] %(message)s", level=logging.INFO)
-    m_logger = logging.getLogger("main")
-    m_handler = logging.FileHandler(path_to_file("logs", "PhysCalc.log"))
-    m_formatter = logging.Formatter("[%(levelname)s] [%(process)d] [%(module)s] [%(asctime)s] %(message)s")
-    m_handler.setFormatter(m_formatter)
-    m_logger.addHandler(m_handler)
+    logging.config.fileConfig(fname=path_to_file("logging.conf"), disable_existing_loggers=False)
     sys.excepthook = log_handler
     app = Qt.QApplication([])
     w = Window()

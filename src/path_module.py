@@ -1,4 +1,6 @@
 import shutil
+import sys
+
 from pathlib import Path
 from os import path, makedirs
 from os.path import basename, isdir
@@ -17,7 +19,7 @@ def path_to_userdata(filename: str, user_id: str) -> str:
     """
     :return: path to file from user's folder
     """
-    return path.join("userdata", user_id, filename)
+    return path_to_file("userdata", user_id, filename)
 
 
 def copy_file(src, username):
