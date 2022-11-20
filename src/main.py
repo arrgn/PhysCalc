@@ -38,7 +38,7 @@ class Window(QWidget):
         self.setLayout(self.layout_)
         self.layout_.addWidget(self.ui)
 
-        self.setGeometry(0, 0, 640, 640)
+        self.setGeometry(100, 100, 640, 640)
         self.ui.setGeometry(0, 0, 640, 640)
         self.ui.addWidget(BallisticWindow().ui)
         self.ui.addWidget(CalcsWindow().ui)
