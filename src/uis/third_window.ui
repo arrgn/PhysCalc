@@ -52,6 +52,20 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="del_forces">
+       <property name="text">
+        <string>Del forces</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="calc_forces">
+       <property name="text">
+        <string>Calc forces</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btn1">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">

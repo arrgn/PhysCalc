@@ -1,9 +1,11 @@
 import json
+import math
 import random
 import sys
 from copy import deepcopy
 from math import radians, cos, sin
 
+import pyperclip
 from PyQt5 import QtCore
 from PyQt5 import uic
 from PyQt5.QtCore import Qt as Qt2
@@ -11,9 +13,8 @@ from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
 from PyQt5.QtWidgets import QApplication, QDialog, QDialogButtonBox, QVBoxLayout, QLabel, QLineEdit, QWidget, QComboBox
 
 from config import user
-from path_module import path_to_file, path_to_userdata
 from loggers import logger
-import pyperclip
+from path_module import path_to_file, path_to_userdata
 
 
 class ExceptionHandler(QtCore.QObject):
@@ -28,21 +29,21 @@ class ExceptionHandler(QtCore.QObject):
 
 
 class ThirdWindow:
-    '''
+    """
     Classs of Third Window
-    '''
+    """
 
     class DrawWindow(QWidget):
-        '''
+        """
         Create QDialog with title, text and ok/cancel buttons
         return number of pressed button
-        '''
+        """
 
         class Dialog(QDialog):
-            '''
+            """
             Create QDialog with title, text and ok/cancel buttons
             return number of pressed button
-            '''
+            """
 
             def __init__(self, text, title, mode="Ask", shared=None, out=None, show_button_ok=False):
                 super().__init__()
@@ -122,6 +123,7 @@ class ThirdWindow:
             self.btn5_wait_to_click = -1
             self.btn7_wait_to_click = -1
             self.render_objects = [[], [], []]
+            self.render_forces = {}
             self.object_history = []
             self.selected = None
             self.patterns = [Qt2.Dense1Pattern, Qt2.Dense2Pattern, Qt2.Dense3Pattern, Qt2.Dense4Pattern,
@@ -142,8 +144,13 @@ class ThirdWindow:
                                 Qt2.transparent]
             self.colorsback2 = ["red", "green", "blue", "cyan", "white", "grey",
                                 "transparent"]
-            self.recte_formule = r"\left|\frac{\left(x-X\right)\cos\alpha-\left(y+Y\right)\sin\alpha}{W}-\frac{\left(x-X\right)\sin\alpha+\left(y+Y\right)\cos\alpha}{H}\right|+\left|\frac{\left(x-X\right)\cos\alpha-\left(y+Y\right)\sin\alpha}{W}+\frac{\left(x-X\right)\sin\alpha+\left(y+Y\right)\cos\alpha}{H}\right|-1"
-            self.line_formule = r"\sqrt{\left(x\ -\ A\right)\ ^{2}\ +\ \left(y\ +\ B\right)^{2}}\ +\ \sqrt{\left(x\ -\ C\right)\ ^{2}\ +\ \left(y\ +\ D\right)^{2}}\ -\ \left(\sqrt{\left(C\ -\ A\right)\ ^{2}\ +\ \left(B\ -\ D\right)^{2}}\ +\ 0.01\right)\ "
+            self.recte_formule = r"\left|\frac{\left(x-X\right)\cos\alpha-\left(y+Y\right)\sin\alpha}{W}-\frac{\left(" \
+                                 r"x-X\right)\sin\alpha+\left(y+Y\right)\cos\alpha}{H}\right|+\left|\frac{\left(" \
+                                 r"x-X\right)\cos\alpha-\left(y+Y\right)\sin\alpha}{W}+\frac{\left(" \
+                                 r"x-X\right)\sin\alpha+\left(y+Y\right)\cos\alpha}{H}\right|-1"
+            self.line_formule = r"\sqrt{\left(x\ -\ A\right)\ ^{2}\ +\ \left(y\ +\ B\right)^{2}}\ +\ \sqrt{\left(x\ " \
+                                r"-\ C\right)\ ^{2}\ +\ \left(y\ +\ D\right)^{2}}\ -\ \left(\sqrt{\left(C\ -\ " \
+                                r"A\right)\ ^{2}\ +\ \left(B\ -\ D\right)^{2}}\ +\ 0.01\right)\ "
             self.initUI()
 
         def initUI(self):
@@ -158,13 +165,15 @@ class ThirdWindow:
             self.btn6.setText("Upload from file")
             self.btn7.setText("Delete")
             self.sandbox.setText("")
-            self.btn1.clicked.connect(lambda: self.btn1_click())
-            self.btn2.clicked.connect(lambda: self.btn2_click())
-            self.btn3.clicked.connect(lambda: self.create_formula())
-            self.btn4.clicked.connect(lambda: self.btn4_click())
-            self.btn5.clicked.connect(lambda: self.btn5_click())
-            self.btn6.clicked.connect(lambda: self.btn6_click())
-            self.btn7.clicked.connect(lambda: self.btn7_click())
+            self.btn1.clicked.connect(self.btn1_click)
+            self.btn2.clicked.connect(self.btn2_click)
+            self.btn3.clicked.connect(self.create_formula)
+            self.btn4.clicked.connect(self.btn4_click)
+            self.btn5.clicked.connect(self.btn5_click)
+            self.btn6.clicked.connect(self.btn6_click)
+            self.btn7.clicked.connect(self.btn7_click)
+            self.del_forces.clicked.connect(self.del_forces_click)
+            self.calc_forces.clicked.connect(self.calc_forces_click)
             self.dial.setMinimum(0)
             self.dial.setMaximum(359)
             self.dial.setValue(0)
@@ -173,7 +182,7 @@ class ThirdWindow:
             self.spinBox.setValue(0)
             self.dial.valueChanged.connect(lambda: self.rotate_changed())
             self.spinBox.valueChanged.connect(self.rotate2_changed)
-            self.colorbox.activated.connect(self.colorchange2)
+            self.colorbox.activated.connect(self.color_change2)
             for i in self.colors:
                 self.colorbox.addItem(i)
             self.colorbox.setCurrentIndex(5)
@@ -185,15 +194,17 @@ class ThirdWindow:
             xe, ye = centre[0], centre[1]
             ye -= self.get_widget_metrix(self.sandbox)[0][1] + self.get_widget_metrix(self.sandbox)[2][1]
             xe -= self.get_widget_metrix(self.sandbox)[0][0]
-            return self.recte_formule.replace(r"\alpha", f"{radians(alphe)}").replace("X", f"{xe}").replace("Y", f"{ye}").replace("W", f"{we}").replace("H", f"{he}")
+            return self.recte_formule.replace(r"\alpha", f"{radians(alphe)}").replace("X", f"{xe}").replace("Y",
+                                                                                                            f"{ye}").replace(
+                "W", f"{we}").replace("H", f"{he}")
 
         def create_line_formule(self, p1, p2):
             p1[1] -= self.get_widget_metrix(self.sandbox)[0][1] + self.get_widget_metrix(self.sandbox)[2][1]
             p2[1] -= self.get_widget_metrix(self.sandbox)[0][1] + self.get_widget_metrix(self.sandbox)[2][1]
             p1[0] -= self.get_widget_metrix(self.sandbox)[0][0]
             p2[0] -= self.get_widget_metrix(self.sandbox)[0][0]
-            return self.line_formule.replace("A", str(p1[0])).replace("B", str(p1[1])).replace("C", str(p2[0])).replace("D", str(p2[1]))
-
+            return self.line_formule.replace("A", str(p1[0])).replace("B", str(p1[1])).replace("C", str(p2[0])).replace(
+                "D", str(p2[1]))
 
         def create_formule(self, rects, lines):
             ans = f"({rects[-1]})"
@@ -214,7 +225,8 @@ class ThirdWindow:
             for i in buf:
                 rect = i[0]
                 angle = i[1]
-                r = [[(rect[1][0] + rect[0][0]) / 2, (rect[1][1] + rect[2][1]) / 2], rect[1][0] - rect[0][0], rect[1][1] - rect[2][1], angle]
+                r = [[(rect[1][0] + rect[0][0]) / 2, (rect[1][1] + rect[2][1]) / 2], rect[1][0] - rect[0][0],
+                     rect[1][1] - rect[2][1], angle]
                 rect_formules.append(self.create_recte_formule(*r))
             buf = deepcopy(self.render_objects[1])
             for i in buf:
@@ -258,21 +270,29 @@ class ThirdWindow:
                     self.drawRect(i[0], i[1], qp)
                     self.update()
 
+            for i in range(len(self.render_objects[2])):
+                if i in self.render_forces:
+                    qp.setPen(QPen(Qt2.blue, 3, Qt2.SolidLine))
+                    self.draw_force(self.render_objects[2][i][0], self.render_forces[i]["mg"], qp)
+                    qp.setPen(QPen(Qt2.red, 3, Qt2.SolidLine))
+                    for v in self.render_forces[i]["n"].values():
+                        self.draw_force(self.render_objects[2][i][0], v, qp)
+
             qp.setPen(QPen(Qt2.black, 3, Qt2.DashDotLine))
 
             if len(self.btn1_drawcoards) == 2:
-                qp.drawLine(*self.transform_coards_for_line(self.btn1_drawcoards))
+                qp.drawLine(*self.transform_coords_for_line(self.btn1_drawcoards))
 
             qp.setBrush(QBrush(Qt2.darkGray, self.current_patt))
 
             if len(self.btn2_drawcoards) == 2:
-                qp.drawRect(*self.transform_coards_for_rect(self.btn2_drawcoards))
+                qp.drawRect(*self.transform_coords_for_rect(self.btn2_drawcoards))
 
             qp.setBrush(QBrush())
             qp.setPen(QPen(Qt2.red, 2, Qt2.DashLine))
 
             if len(self.btn7_drawcoards) == 2:
-                qp.drawRect(*self.transform_coards_for_rect(self.btn7_drawcoards))
+                qp.drawRect(*self.transform_coords_for_rect(self.btn7_drawcoards))
 
             qp.setBrush(QBrush())
             qp.setPen(QPen(Qt2.black, 3, Qt2.DashDotLine))
@@ -286,7 +306,7 @@ class ThirdWindow:
                         qp.setBrush(QBrush(QColor(self.moving[2]), Qt2.DiagCrossPattern))
                 self.drawRect(self.moving[0], self.moving[1], qp)
 
-        def rotate_rect_coards(self, center, w, h, angle):
+        def rotate_rect_coords(self, center, w, h, angle):
             ans = [[], [], [], []]
             a = radians(angle)
             ans[0] = [(cos(a) * w - sin(a) * h) / 2 + center[0], (sin(a) * w + cos(a) * h) / 2 + center[1]]
@@ -294,7 +314,6 @@ class ThirdWindow:
             ans[2] = [(cos(a) * (-w) - sin(a) * (-h)) / 2 + center[0], (sin(a) * (-w) + cos(a) * (-h)) / 2 + center[1]]
             ans[3] = [(cos(a) * w - sin(a) * (-h)) / 2 + center[0], (sin(a) * w + cos(a) * (-h)) / 2 + center[1]]
             return ans
-
 
         def rotate_rect(self, rect, angle):
             '''
@@ -304,10 +323,62 @@ class ThirdWindow:
             '''
             j = [[(rect[1][0] + rect[0][0]) / 2, (rect[1][1] + rect[2][1]) / 2], rect[1][0] - rect[0][0],
                  rect[1][1] - rect[2][1], angle]
-            j = self.rotate_rect_coards(*j)
+            j = self.rotate_rect_coords(*j)
             for h in range(len(j)):
                 j[h] = [int(j[h][0]), int(j[h][1])]
             return j
+
+        def del_forces_click(self):
+            self.render_forces.clear()
+
+        def calc_forces_click(self):
+            def f(rect, d):
+                rect = deepcopy(rect)
+
+                rect[0][1] += d
+                rect[1][1] += d
+                rect[2][1] += d
+                rect[3][1] += d
+
+                return rect
+
+            self.del_forces_click()
+
+            for i in range(len(self.render_objects[2])):
+                if i not in self.render_forces:
+                    self.render_forces[i] = {}
+
+                self.render_forces[i]["mg"] = (0, 1)
+                self.render_forces[i]["n"] = {}
+
+                for j in range(len(self.render_objects[2])):
+                    if i != j:
+                        r1 = self.rotate_rect(self.render_objects[2][i][0], self.render_objects[2][i][1])
+                        r2 = self.rotate_rect(self.render_objects[2][j][0], self.render_objects[2][j][1])
+
+                        center1 = (r1[0][0] + r1[2][0]) // 2, (r1[0][1] + r1[2][1]) // 2
+                        center2 = (r2[0][0] + r2[2][0]) // 2, (r2[0][1] + r2[2][1]) // 2
+
+                        if center1[1] < center2[1]:
+                            rect1 = f(r1, 3)
+                            rect2 = f(r2, 0)
+                        else:
+                            rect1 = f(r1, 0)
+                            rect2 = f(r2, 3)
+
+                        normal = self.RectAndRectCollision(rect1, rect2)
+
+                        if normal:
+                            self.render_forces[i]["n"][str(j) + "_rect"] = normal
+                for j in range(len(self.render_objects[1])):
+                    rect = f(self.render_objects[2][i][0], 3)
+                    line = self.render_objects[1][j]
+                    line = [line[:2], line[2:]]
+
+                    normal = self.RectAndLineCollision(rect, line)
+
+                    if normal:
+                        self.render_forces[i]["n"][str(j) + "_line"] = normal
 
         def drawRect(self, rect, angle, painter):
             '''
@@ -321,6 +392,17 @@ class ThirdWindow:
             for h in range(len(r)):
                 r[h] = QtCore.QPoint(*r[h])
             painter.drawConvexPolygon(*r)
+            # self.render_objects[3].append((rect, (0, 1)))
+
+        def draw_force(self, rect, vector, painter):
+            force_len = 150
+            pos = (rect[0][0] + rect[2][0]) // 2, (rect[0][1] + rect[2][1]) // 2
+            normalized = self.resize_vector(vector, force_len)
+            painter.drawLine(*pos, pos[0] + normalized[0], pos[1] + normalized[1])
+
+        def resize_vector(self, vector, new_len=1):
+            v_len = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
+            return int(vector[0] * new_len / v_len), int(vector[1] * new_len / v_len)
 
         def paintEvent(self, event):
             qp = QPainter()
@@ -328,7 +410,7 @@ class ThirdWindow:
             self.renderf(qp)
             qp.end()
 
-        def transform_coards_for_rect(self, coards):
+        def transform_coords_for_rect(self, coards):
             return [coards[0][0], coards[0][1], coards[1][0] - coards[0][0], coards[1][1] - coards[0][1]]
 
         def get_all_points(self, rect):
@@ -343,7 +425,7 @@ class ThirdWindow:
             p[3] = [rect[1][0], rect[0][1]]
             return self.sort_rect_points(p)
 
-        def transform_coards_for_line(self, coards):
+        def transform_coords_for_line(self, coards):
             return [coards[0][0], coards[0][1], coards[1][0], coards[1][1]]
 
         def flag_down(self):
@@ -402,7 +484,7 @@ class ThirdWindow:
 
             self.update()
 
-        def colorchange(self, value):
+        def color_change(self, value):
             mapped_value = int(value / 100 * 5)
             colors = [Qt2.black, Qt2.darkGray, Qt2.gray, Qt2.lightGray, Qt2.white]
             if len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 2:
@@ -410,7 +492,7 @@ class ThirdWindow:
             elif len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 3:
                 self.render_objects[2][self.render_objects[2].index(self.selected)][2] = colors[mapped_value]
 
-        def colorchange2(self):
+        def color_change2(self):
             color = self.colors[self.colorbox.currentText()]
             if len(self.render_objects[2][self.render_objects[2].index(self.selected)]) == 2:
                 self.render_objects[2][self.render_objects[2].index(self.selected)].append(color)
@@ -421,7 +503,7 @@ class ThirdWindow:
             rs = self.Dialog("Are you sure you want to clear the screen?", "Clearing", show_button_ok=True).exec()
             if rs:
                 self.btn1_drawcoards = []
-                self.render_objects = [[self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
+                self.render_objects = [[self.transform_coords_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
                                         [220, 220, 220]], [], []]
                 self.btn1_wait_to_click = -1
                 self.object_history = []
@@ -575,24 +657,40 @@ class ThirdWindow:
             return [mi, ma]
 
         def RectAndRectCollision(self, rect1, rect2):
-            '''
+            """
             :param rect1: 4 points of rect
             :param rect2: 4 points of rect
             :return: True if rects have a collision else False
-            '''
+            """
+            a = (rect1[0][0] + rect1[2][0] - rect2[0][0] - rect2[2][0]) // 2, (
+                    rect1[0][1] + rect1[2][1] - rect2[0][1] - rect2[2][1]) // 2
+
+            depth = 8_800_555_35_35
+            normal = [1, 1]
             for i in [3, 1]:
-                o = [rect1[0][0] - rect1[i][0], rect1[0][1] - rect1[i][1]]
-                proj1 = self.ProjectVertices(rect1, o)
-                proj2 = self.ProjectVertices(rect2, o)
-                if proj1[0] >= proj2[1] or proj2[0] >= proj1[1]:
+                axis = [rect1[0][0] - rect1[i][0], rect1[0][1] - rect1[i][1]]
+                proj1 = self.ProjectVertices(rect1, axis)
+                proj2 = self.ProjectVertices(rect2, axis)
+                if proj1[0] > proj2[1] or proj2[0] > proj1[1]:
                     return False
+                axis_depth = min(proj1[1] - proj2[0], proj2[1] - proj1[0])
+                if axis_depth < depth:
+                    depth = axis_depth
+                    normal = axis
             for i in [3, 1]:
-                o = [rect2[0][0] - rect2[i][0], rect2[0][1] - rect2[i][1]]
-                proj1 = self.ProjectVertices(rect1, o)
-                proj2 = self.ProjectVertices(rect2, o)
-                if proj1[0] >= proj2[1] or proj2[0] >= proj1[1]:
+                axis = [rect2[0][0] - rect2[i][0], rect2[0][1] - rect2[i][1]]
+                proj1 = self.ProjectVertices(rect1, axis)
+                proj2 = self.ProjectVertices(rect2, axis)
+                if proj1[0] > proj2[1] or proj2[0] > proj1[1]:
                     return False
-            return True
+                axis_depth = min(proj1[1] - proj2[0], proj2[1] - proj1[0])
+                if axis_depth < depth:
+                    depth = axis_depth
+                    normal = axis
+            if self.dot(normal, a) < 0:
+                normal[0] = -normal[0]
+                normal[1] = -normal[1]
+            return normal
 
         def RectAndLineCollision(self, rect, line):
             '''
@@ -600,18 +698,33 @@ class ThirdWindow:
             :param line: 2 points of line
             :return: True if rect and line have a collision else False
             '''
+            a = (rect[0][0] + rect[2][0] - line[0][0] - line[1][0]) // 2, (
+                    rect[0][1] + rect[2][1] - line[0][1] - line[1][1]) // 2
+            depth = 8_800_555_35_35
+            normal = [1, 1]
             for i in [3, 1]:
-                o = [rect[0][0] - rect[i][0], rect[0][1] - rect[i][1]]
-                proj1 = self.ProjectVertices(rect, o)
-                proj2 = self.ProjectVertices(line, o)
+                axis = [rect[0][0] - rect[i][0], rect[0][1] - rect[i][1]]
+                proj1 = self.ProjectVertices(rect, axis)
+                proj2 = self.ProjectVertices(line, axis)
                 if proj1[0] >= proj2[1] or proj2[0] >= proj1[1]:
                     return False
-            o = [-(line[1][1] - line[0][1]), line[1][0] - line[0][0]]
-            proj1 = self.ProjectVertices(line, o)
-            proj2 = self.ProjectVertices(rect, o)
+                axis_depth = min(proj1[1] - proj2[0], proj2[1] - proj1[0])
+                if axis_depth < depth:
+                    depth = axis_depth
+                    normal = axis
+            axis = [-(line[1][1] - line[0][1]), line[1][0] - line[0][0]]
+            proj1 = self.ProjectVertices(line, axis)
+            proj2 = self.ProjectVertices(rect, axis)
             if proj1[0] >= proj2[1] or proj2[0] >= proj1[1]:
                 return False
-            return True
+            axis_depth = min(proj1[1] - proj2[0], proj2[1] - proj1[0])
+            if axis_depth < depth:
+                depth = axis_depth
+                normal = axis
+            if self.dot(normal, a) < 0:
+                normal[0] = -normal[0]
+                normal[1] = -normal[1]
+            return normal
 
         def RectAnfRenderObjCollision(self, rect, renderobjects):
             '''
@@ -753,7 +866,7 @@ class ThirdWindow:
         def mouseMoveEvent(self, event):
             mouse_coards = (event.x(), event.y())
             mouse_btn = event.button()
-            self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
+            self.render_objects[0] = [self.transform_coords_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
                                       [220, 220, 220]]
             if len(self.btn1_drawcoards) == 2:
                 self.btn1_drawcoards[1] = self.moose_set_in_widget(mouse_coards, self.sandbox)
@@ -772,7 +885,7 @@ class ThirdWindow:
                 self.hide = deepcopy(self.render_objects[2][self.render_objects[2].index(self.selected)])
                 if not self.RectAndWidgetCollision(self.rotate_rect(buf[0], buf[1]),
                                                    self.sandbox) and (not self.RectAnfRenderObjCollision(
-                    self.rotate_rect(buf[0], buf[1]), self.render_objects) or self.collisionoff) :
+                    self.rotate_rect(buf[0], buf[1]), self.render_objects) or self.collisionoff):
                     self.moving = buf
                 else:
                     pass
@@ -787,7 +900,7 @@ class ThirdWindow:
             mouse_coards = [event.x(), event.y()]
             self.mouse_btn = event.button()
             mouse_in_sandbox = self.mouse_in_widget(mouse_coards, self.sandbox)[-1]
-            self.render_objects[0] = [self.transform_coards_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
+            self.render_objects[0] = [self.transform_coords_for_rect(self.mouse_in_widget([0, 0], self.sandbox)[:2]),
                                       [220, 220, 220]]
             if self.btn1_wait_to_click in [0] and mouse_in_sandbox and self.mouse_btn == 1:
                 self.selected = None
@@ -864,7 +977,7 @@ class ThirdWindow:
 
             if mouse_btn == 1 and len(self.btn1_drawcoards) == 2:
                 flag = True
-                line = self.transform_coards_for_line(self.btn1_drawcoards)
+                line = self.transform_coords_for_line(self.btn1_drawcoards)
                 # print(self.line_len(line))
                 if self.line_len(line) > 100 or self.collisionoff:
                     line = [[line[0], line[1]], [line[2], line[3]]]
@@ -872,10 +985,10 @@ class ThirdWindow:
                         if self.RectAndLineCollision(self.rotate_rect(i[0], i[1]), line) and not self.collisionoff:
                             flag = False
                     if flag:
-                        self.render_objects[1].append(self.transform_coards_for_line(self.btn1_drawcoards))
+                        self.render_objects[1].append(self.transform_coords_for_line(self.btn1_drawcoards))
                         # print(
                         #     f"drawn LINE from ({self.render_objects[1][-1][0]}, {self.render_objects[1][-1][1]}) to ({self.render_objects[1][-1][2]}, {self.render_objects[1][-1][3]})")
-                        self.object_history.append([1, self.transform_coards_for_line(self.btn1_drawcoards)])
+                        self.object_history.append([1, self.transform_coords_for_line(self.btn1_drawcoards)])
                 self.btn1_drawcoards = []
                 self.btn1_wait_to_click = 0
 

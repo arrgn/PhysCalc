@@ -5,7 +5,7 @@ path_to_db = "db.db"
 # default_user: list[str(username), str(password)]
 default_user = ["guest", ""]
 
-release = True
+release = False
 
 dao = DAO(path_to_db)
 user = User(database=dao)
